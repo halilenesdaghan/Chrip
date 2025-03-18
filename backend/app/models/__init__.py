@@ -1,43 +1,33 @@
 """
-Veri Modelleri Paketi
-------------------
-DynamoDB modelleri ve veri şemalarını içerir.
+Data Models Package
+----------------
+Contains DynamoDB models and data schemas.
 """
 
-from app.models.user import UserModel
-from app.models.forum import ForumModel
-from app.models.comment import CommentModel
-from app.models.poll import PollModel, PollOption, PollVote
-from app.models.group import GroupModel, GroupMember
-from app.models.base import BaseModel, generate_uuid
+from app.models.BaseModel import BaseModel
+from app.models.UserModel import UserModel
+from app.models.ForumModel import ForumModel
+from app.models.CommentModel import CommentModel
+from app.models.PollModel import PollModel, PollOption, PollVote
+from app.models.GroupModel import GroupModel, GroupMember
+from app.models.MediaModel import MediaModel
 
 def setup_model_associations():
     """
-    Tüm modellerin ilişkilerini yapılandırır.
-    Bu fonksiyon, uygulamanın başlangıcında çağrılmalıdır.
+    Set up model associations if needed.
     """
-    # İlişkiler burada kurulur (eğer gerekirse)
-    # DynamoDB NoSQL olduğu için ilişkiler daha çok kod tarafında yönetilir
+    # No need for explicit associations with this architecture
+    pass
 
 def setup_models(app):
     """
-    Tüm modelleri uygulama konfigurasyon değerleriyle yapılandırır.
+    Set up models with application config.
     
     Args:
-        app: Flask uygulaması veya konfigurasyon nesnesi
+        app: Flask application or config object
     """
-    models = [
-        BaseModel,
-        UserModel,
-        ForumModel,
-        CommentModel, 
-        PollModel,
-        GroupModel
-    ]
-    
-    for model in models:
-        if hasattr(model, 'setup_meta'):
-            model.setup_meta(app)
+    # No special setup needed with this architecture
+    pass
 
 __all__ = [
     'UserModel',
@@ -48,8 +38,8 @@ __all__ = [
     'PollVote',
     'GroupModel',
     'GroupMember',
+    'MediaModel',
     'BaseModel',
-    'generate_uuid',
     'setup_model_associations',
     'setup_models'
 ]

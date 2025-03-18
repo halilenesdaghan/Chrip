@@ -34,9 +34,7 @@ from app.utils.dynamodb import (
     initialize_dynamodb,
     get_dynamodb_client,
     get_dynamodb_resource,
-    get_pynamodb_connection,
     create_tables,
-    delete_tables,
     generate_id
 )
 
@@ -68,8 +66,6 @@ __all__ = [
     'initialize_dynamodb',
     'get_dynamodb_client',
     'get_dynamodb_resource',
-    'get_pynamodb_connection',
     'create_tables',
-    'delete_tables',
     'generate_id'
 ]

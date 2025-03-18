@@ -1,54 +1,91 @@
 """
-Servis Paketi
-----------
-Uygulama iş mantığını içeren servis modüllerini içerir.
-Her servis, ilgili işlemler için singleton olarak çalışır.
+Veritabanı Hizmetleri Başlatma Modülü
+------------------------------------
+Tüm veritabanı hizmetlerini başlatır ve yapılandırır.
 """
 
-from app.services.auth_service import auth_service
-from app.services.user_service import user_service
-from app.services.forum_service import forum_service
-from app.services.comment_service import comment_service
-from app.services.poll_service import poll_service
-from app.services.group_service import group_service
-from app.services.media_service import media_service
+import logging
+from typing import Dict
 
-# Servis registry
-services = {
-    'auth': auth_service,
-    'user': user_service,
-    'forum': forum_service,
-    'comment': comment_service,
-    'poll': poll_service,
-    'group': group_service,
-    'media': media_service
-}
+# Veritabanı servislerini içe aktar
+from app.services.UserTableDatabaseService import UserDatabaseService
+from app.services.ForumTableDatabaseService import ForumDatabaseService
+from app.services.CommentTableDatabaseService import CommentDatabaseService
+from app.services.PollTableDatabaseService import PollDatabaseService
+from app.services.GroupTableDatabaseService import GroupDatabaseService
+from app.services.MediaDatabaseService import MediaDatabaseService
 
-def get_service(service_name):
+logger = logging.getLogger(__name__)
+
+# Veritabanı servis örnekleri
+_database_services: Dict[str, any] = {}
+
+def initialize_database_services(app=None):
     """
-    İsme göre servis nesnesini döndürür.
+    Tüm veritabanı hizmetlerini başlatır ve yapılandırır
+    
+    Args:
+        app (Flask, optional): Flask uygulama örneği
+    """
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    config = app.config.get('DATABASE_CONFIG', {}) if app else {}
+
+    #prints the configs in yellow using ansi escape codes
+    print ("\033[93m" + str(config) + "\033[0m")
+    for handler in logger.handlers:
+        print(f"  - {handler.__class__.__name__}")
+        print(f"    Level: {logging.getLevelName(handler.level)}")
+        # If it's a FileHandler, you can also print the filename:
+        if isinstance(handler, logging.FileHandler):
+            print(f"    File: {handler.baseFilename}")
+
+    try:
+        # Veritabanı servislerini başlat
+        services = [
+            ('user', UserDatabaseService),
+            ('forum', ForumDatabaseService),
+            ('comment', CommentDatabaseService),
+            ('poll', PollDatabaseService),
+            ('group', GroupDatabaseService),
+            ('media', MediaDatabaseService)
+        ]
+        
+        for service_name, ServiceClass in services:
+            try:
+                service_instance = ServiceClass()
+                _database_services[service_name] = service_instance
+                logger.info(f"{service_name.capitalize()} veritabanı servisi başlatıldı")
+            except Exception as service_error:
+                logger.error(f"{service_name.capitalize()} veritabanı servisi başlatılamadı: {service_error}")
+        
+    except Exception as e:
+        logger.error(f"Veritabanı servisleri başlatılırken hata oluştu: {e}")
+
+def get_database_service(service_name: str):
+    """
+    Belirli bir veritabanı servisini döndürür
     
     Args:
         service_name (str): Servis adı
-        
+    
     Returns:
-        object: Servis nesnesi
-        
+        Veritabanı servisi örneği
+    
     Raises:
         KeyError: Servis bulunamazsa
     """
-    if service_name not in services:
-        raise KeyError(f"Service not found: {service_name}")
+    if service_name not in _database_services:
+        raise KeyError(f"Veritabanı servisi bulunamadı: {service_name}")
     
-    return services[service_name]
+    return _database_services[service_name]
 
 __all__ = [
-    'auth_service',
-    'user_service',
-    'forum_service',
-    'comment_service',
-    'poll_service',
-    'group_service',
-    'media_service',
-    'get_service'
+    'initialize_database_services',
+    'get_database_service'
 ]

@@ -5,7 +5,6 @@ Flask uygulaması için merkezi hata işleme fonksiyonları.
 """
 
 import logging
-from pynamodb.exceptions import DoesNotExist, PynamoDBConnectionError
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
 from app.utils.exceptions import ApiError, AuthError, NotFoundError, ValidationError, ForbiddenError, ConflictError
@@ -110,41 +109,6 @@ def register_error_handlers(app):
         response = error.to_dict()
         logger.warning(f"Conflict Error: {error.message}")
         return jsonify(response), error.status_code
-    
-    @app.errorhandler(DoesNotExist)
-    def handle_does_not_exist(error):
-        """
-        DynamoDB öğe bulunamadı hatalarını işler.
-        
-        Args:
-            error (DoesNotExist): DynamoDB bulunamadı hatası
-            
-        Returns:
-            tuple: Hata yanıtı ve HTTP durum kodu
-        """
-        response = {
-            'status': 'error',
-            'message': 'İstenen kaynak bulunamadı'
-        }
-        return jsonify(response), 404
-    
-    @app.errorhandler(PynamoDBConnectionError)
-    def handle_dynamodb_connection_error(error):
-        """
-        DynamoDB bağlantı hatalarını işler.
-        
-        Args:
-            error (PynamoDBConnectionError): DynamoDB bağlantı hatası
-            
-        Returns:
-            tuple: Hata yanıtı ve HTTP durum kodu
-        """
-        logger.error(f"DynamoDB Connection Error: {str(error)}")
-        response = {
-            'status': 'error',
-            'message': 'Veritabanı bağlantı hatası'
-        }
-        return jsonify(response), 500
     
     @app.errorhandler(HTTPException)
     def handle_http_exception(error):

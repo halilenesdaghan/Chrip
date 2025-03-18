@@ -1,23 +1,25 @@
 """
-Kimlik Doğrulama API
-------------------
-Kullanıcı kaydı, girişi ve kimlik doğrulama işlemleri için API endpoints.
+Authentication API
+---------------
+Endpoints for user registration, login, and authentication.
 """
 
 from flask import Blueprint, request, jsonify, g
 from marshmallow import Schema, fields, validate
-from app.services.auth_service import auth_service
+from app.services.auth_service import AuthService
 from app.utils.responses import success_response, error_response, created_response
 from app.middleware.validation import validate_schema
 from app.middleware.auth import authenticate
 from app.utils.exceptions import AuthError, ValidationError
 
-# Blueprint tanımla
+# Define blueprint
 auth_bp = Blueprint('auth', __name__)
 
-# Şemalar
+auth_service = AuthService()
+
+# Schemas
 class RegisterSchema(Schema):
-    """Kullanıcı kaydı şeması"""
+    """Registration schema"""
     email = fields.Email(required=True, error_messages={'required': 'E-posta gereklidir'})
     username = fields.Str(required=True, validate=validate.Length(min=3, max=30), error_messages={'required': 'Kullanıcı adı gereklidir'})
     password = fields.Str(required=True, validate=validate.Length(min=6), error_messages={'required': 'Şifre gereklidir'})
@@ -25,21 +27,21 @@ class RegisterSchema(Schema):
     universite = fields.Str()
 
 class LoginSchema(Schema):
-    """Kullanıcı girişi şeması"""
+    """Login schema"""
     email = fields.Email(required=True, error_messages={'required': 'E-posta gereklidir'})
     password = fields.Str(required=True, error_messages={'required': 'Şifre gereklidir'})
 
 class PasswordChangeSchema(Schema):
-    """Şifre değiştirme şeması"""
+    """Password change schema"""
     current_password = fields.Str(required=True, error_messages={'required': 'Mevcut şifre gereklidir'})
     new_password = fields.Str(required=True, validate=validate.Length(min=6), error_messages={'required': 'Yeni şifre gereklidir'})
 
 class ForgotPasswordSchema(Schema):
-    """Şifre sıfırlama isteği şeması"""
+    """Forgot password schema"""
     email = fields.Email(required=True, error_messages={'required': 'E-posta gereklidir'})
 
 class ResetPasswordSchema(Schema):
-    """Şifre sıfırlama şeması"""
+    """Reset password schema"""
     reset_token = fields.Str(required=True, error_messages={'required': 'Sıfırlama token gereklidir'})
     new_password = fields.Str(required=True, validate=validate.Length(min=6), error_messages={'required': 'Yeni şifre gereklidir'})
 
@@ -47,17 +49,12 @@ class ResetPasswordSchema(Schema):
 @auth_bp.route('/register', methods=['POST'])
 @validate_schema(RegisterSchema())
 def register():
-    """
-    Yeni kullanıcı kaydı yapar.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
+    """Register a new user"""
     try:
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data
         data = request.validated_data
         
-        # Kullanıcı kaydı
+        # Register user
         result = auth_service.register(data)
         
         return created_response(result, "Kullanıcı başarıyla kaydedildi")
@@ -74,17 +71,12 @@ def register():
 @auth_bp.route('/login', methods=['POST'])
 @validate_schema(LoginSchema())
 def login():
-    """
-    Kullanıcı girişi yapar.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
+    """User login"""
     try:
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data
         data = request.validated_data
         
-        # Kullanıcı girişi
+        # Login
         result = auth_service.login(data['email'], data['password'])
         
         return success_response(result, "Giriş başarılı")
@@ -98,29 +90,19 @@ def login():
 @auth_bp.route('/me', methods=['GET'])
 @authenticate
 def me():
-    """
-    Mevcut kullanıcı bilgilerini getirir.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
-    user = g.user
-    return success_response(user.to_dict(), "Kullanıcı bilgileri getirildi")
+    """Get current user info"""
+    # User is stored in g.user by the authenticate middleware
+    return success_response(g.user.to_dict(), "Kullanıcı bilgileri getirildi")
 
 @auth_bp.route('/refresh-token', methods=['POST'])
 @authenticate
 def refresh_token():
-    """
-    Token yeniler.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
+    """Refresh token"""
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID
         user_id = g.user.user_id
         
-        # Token yenile
+        # Refresh token
         token = auth_service.refresh_token(user_id)
         
         return success_response({'token': token}, "Token yenilendi")
@@ -135,20 +117,15 @@ def refresh_token():
 @authenticate
 @validate_schema(PasswordChangeSchema())
 def change_password():
-    """
-    Kullanıcı şifresini değiştirir.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
+    """Change password"""
     try:
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data
         data = request.validated_data
         
-        # Mevcut kullanıcı ID'si
+        # Get current user ID
         user_id = g.user.user_id
         
-        # Şifre değiştir
+        # Change password
         auth_service.change_password(
             user_id, 
             data['current_password'], 
@@ -166,39 +143,29 @@ def change_password():
 @auth_bp.route('/forgot-password', methods=['POST'])
 @validate_schema(ForgotPasswordSchema())
 def forgot_password():
-    """
-    Şifre sıfırlama isteği gönderir.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
+    """Request password reset"""
     try:
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data
         data = request.validated_data
         
-        # Şifre sıfırlama isteği
+        # Request password reset
         result = auth_service.forgot_password(data['email'])
         
         return success_response(result, "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi")
     
     except Exception as e:
-        # Güvenlik için, e-posta bulunamasa bile aynı mesajı döndür
+        # For security, always return success response
         return success_response(None, "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi")
 
 @auth_bp.route('/reset-password', methods=['POST'])
 @validate_schema(ResetPasswordSchema())
 def reset_password():
-    """
-    Şifre sıfırlar.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
+    """Reset password"""
     try:
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data
         data = request.validated_data
         
-        # Şifre sıfırla
+        # Reset password
         auth_service.reset_password(
             data['reset_token'], 
             data['new_password']

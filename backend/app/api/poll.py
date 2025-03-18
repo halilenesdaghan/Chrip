@@ -1,69 +1,81 @@
-"""
-Anket API
--------
-Anket oluşturma, listeleme, oylama ve yönetim için API endpoints.
-"""
-
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, g
 from marshmallow import Schema, fields, validate
-from app.services.poll_service import poll_service
-from app.utils.responses import success_response, error_response, list_response, created_response, updated_response, deleted_response
-from app.middleware.validation import validate_schema, validate_path_param, validate_query_params, is_uuid, is_positive_integer, is_boolean
-from app.middleware.auth import authenticate, authorize
-from app.utils.exceptions import NotFoundError, ValidationError, ForbiddenError
+from app.services.PollTableDatabaseService import PollDatabaseService
+from app.utils.responses import (
+    success_response, 
+    error_response, 
+    list_response, 
+    created_response, 
+    updated_response, 
+    deleted_response
+)
+from app.middleware.auth import authenticate
+from app.middleware.validation import (
+    validate_schema, 
+    is_uuid, 
+    is_positive_integer, 
+    is_boolean
+)
 
-# Blueprint tanımla
+# Blueprint and Database Service
 poll_bp = Blueprint('poll', __name__)
+poll_db_service = PollDatabaseService()
 
-# Şemalar
+# Schemas
 class PollCreateSchema(Schema):
-    """Anket oluşturma şeması"""
-    baslik = fields.Str(required=True, validate=validate.Length(min=3, max=100), error_messages={'required': 'Anket başlığı zorunludur'})
+    """Poll creation schema"""
+    baslik = fields.Str(
+        required=True, 
+        validate=validate.Length(min=3, max=100),
+        error_messages={'required': 'Anket başlığı zorunludur'}
+    )
     aciklama = fields.Str()
-    secenekler = fields.List(fields.Str(), required=True, validate=validate.Length(min=2), error_messages={'required': 'Anket seçenekleri zorunludur'})
-    kategori = fields.Str()
+    secenekler = fields.List(
+        fields.Str(), 
+        required=True, 
+        validate=validate.Length(min=2),
+        error_messages={'required': 'En az iki seçenek gereklidir'}
+    )
+    bitis_tarihi = fields.DateTime(format='iso8601')
     universite = fields.Str()
-    bitis_tarihi = fields.Str()  # ISO 8601 formatında
+    kategori = fields.Str()
 
 class PollUpdateSchema(Schema):
-    """Anket güncelleme şeması"""
+    """Poll update schema"""
     baslik = fields.Str(validate=validate.Length(min=3, max=100))
     aciklama = fields.Str()
     secenekler = fields.List(fields.Str(), validate=validate.Length(min=2))
+    bitis_tarihi = fields.DateTime(format='iso8601')
     kategori = fields.Str()
-    bitis_tarihi = fields.Str()  # ISO 8601 formatında
 
 class PollVoteSchema(Schema):
-    """Anket oylama şeması"""
+    """Poll voting schema"""
     option_id = fields.Str(required=True, error_messages={'required': 'Seçenek ID zorunludur'})
 
 # Routes
 @poll_bp.route('/', methods=['GET'])
-@validate_query_params({
-    'page': is_positive_integer,
-    'per_page': is_positive_integer
-})
-def get_all_polls():
+def get_polls():
     """
-    Tüm anketleri getirir.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve polls with optional filtering and pagination
     """
     try:
-        # Sorgu parametreleri
+        # Extract query parameters
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
         kategori = request.args.get('kategori')
         universite = request.args.get('universite')
         
-        # Aktiflik filtresi
+        # Aktiflik filtresi (boolean kontrolü)
         aktif = None
         if 'aktif' in request.args:
-            aktif = is_boolean(request.args.get('aktif'))
+            aktif_param = request.args.get('aktif')
+            if aktif_param.lower() in ('true', '1', 'yes'):
+                aktif = True
+            elif aktif_param.lower() in ('false', '0', 'no'):
+                aktif = False
         
-        # Anketleri getir
-        result = poll_service.get_all_polls(
+        # Get polls
+        result = poll_db_service.get_polls(
             page=page,
             per_page=per_page,
             kategori=kategori,
@@ -72,8 +84,8 @@ def get_all_polls():
         )
         
         return list_response(
-            result['polls'],
-            result['meta']['total'],
+            result['polls'], 
+            result['meta']['total'], 
             result['meta']['page'],
             result['meta']['per_page'],
             "Anketler başarıyla getirildi"
@@ -83,25 +95,18 @@ def get_all_polls():
         return error_response(str(e), 500)
 
 @poll_bp.route('/<poll_id>', methods=['GET'])
-@validate_path_param('poll_id', is_uuid)
+@validate_schema({'poll_id': fields.Str(validate=is_uuid)})
 def get_poll(poll_id):
     """
-    Anket bilgilerini getirir.
-    
-    Args:
-        poll_id (str): Anket ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve a specific poll by ID
     """
     try:
-        # Anketi getir
-        poll = poll_service.get_poll_by_id(poll_id)
+        poll = poll_db_service.get_poll_by_id(poll_id)
         
-        return success_response(poll, "Anket başarıyla getirildi")
-    
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
+        if not poll:
+            return error_response("Anket bulunamadı", 404)
+        
+        return success_response(poll.to_dict(), "Anket başarıyla getirildi")
     
     except Exception as e:
         return error_response(str(e), 500)
@@ -111,156 +116,138 @@ def get_poll(poll_id):
 @validate_schema(PollCreateSchema())
 def create_poll():
     """
-    Yeni anket oluşturur.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Create a new poll
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data from request
         data = request.validated_data
         
-        # Anket oluştur
-        poll = poll_service.create_poll(user_id, data)
+        # Create poll
+        poll = poll_db_service.create_poll(
+            user_id=user_id,
+            baslik=data['baslik'],
+            secenekler=data['secenekler'],
+            aciklama=data.get('aciklama'),
+            bitis_tarihi=data.get('bitis_tarihi', '').isoformat() if data.get('bitis_tarihi') else None,
+            universite=data.get('universite'),
+            kategori=data.get('kategori')
+        )
         
-        return created_response(poll, "Anket başarıyla oluşturuldu")
+        return created_response(poll.to_dict(), "Anket başarıyla oluşturuldu")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Anket oluşturulamadı", 500)
 
 @poll_bp.route('/<poll_id>', methods=['PUT'])
 @authenticate
-@validate_path_param('poll_id', is_uuid)
 @validate_schema(PollUpdateSchema())
 def update_poll(poll_id):
     """
-    Anket bilgilerini günceller.
-    
-    Args:
-        poll_id (str): Anket ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Update an existing poll
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
-        data = request.validated_data
+        # Get validated update data
+        update_data = request.validated_data
         
-        # Anket güncelle
-        poll = poll_service.update_poll(poll_id, user_id, data)
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
         
-        return updated_response(poll, "Anket başarıyla güncellendi")
+        # Convert datetime to ISO format if present
+        if 'bitis_tarihi' in update_data:
+            update_data['bitis_tarihi'] = update_data['bitis_tarihi'].isoformat()
+        
+        # Update poll
+        updated_poll = poll_db_service.update_poll(
+            poll_id=poll_id,
+            user_id=user_id,
+            update_data=update_data
+        )
+        
+        return updated_response(updated_poll.to_dict(), "Anket başarıyla güncellendi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ForbiddenError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Anket güncellenemedi", 500)
 
 @poll_bp.route('/<poll_id>', methods=['DELETE'])
 @authenticate
-@validate_path_param('poll_id', is_uuid)
 def delete_poll(poll_id):
     """
-    Anketi siler.
-    
-    Args:
-        poll_id (str): Anket ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Soft delete a poll
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Anket sil
-        poll_service.delete_poll(poll_id, user_id)
+        # Retrieve the poll first
+        poll = poll_db_service.get_poll_by_id(poll_id)
+        
+        if not poll:
+            return error_response("Anket bulunamadı", 404)
+        
+        # Check if user is authorized to delete
+        if poll.acan_kisi_id != user_id:
+            return error_response("Bu anketi silme yetkiniz yok", 403)
+        
+        # Perform soft delete
+        poll_db_service.delete_poll(poll_id, user_id)
         
         return deleted_response("Anket başarıyla silindi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ForbiddenError as e:
-        return error_response(e.message, e.status_code)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Anket silinemedi", 500)
 
 @poll_bp.route('/<poll_id>/vote', methods=['POST'])
 @authenticate
-@validate_path_param('poll_id', is_uuid)
 @validate_schema(PollVoteSchema())
 def vote_poll(poll_id):
     """
-    Ankete oy verir.
-    
-    Args:
-        poll_id (str): Anket ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Cast a vote in a poll
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
+        # Get validated option ID from request
         data = request.validated_data
         
-        # Ankete oy ver
-        result = poll_service.vote_poll(poll_id, user_id, data['option_id'])
+        # Vote in poll
+        result = poll_db_service.vote_poll(
+            poll_id=poll_id, 
+            user_id=user_id, 
+            option_id=data['option_id']
+        )
         
         return success_response(result, "Oy başarıyla kaydedildi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Oy verilemedi", 500)
 
 @poll_bp.route('/<poll_id>/results', methods=['GET'])
-@validate_path_param('poll_id', is_uuid)
 def get_poll_results(poll_id):
     """
-    Anket sonuçlarını getirir.
-    
-    Args:
-        poll_id (str): Anket ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve poll results
     """
     try:
-        # Anket sonuçlarını getir
-        results = poll_service.get_poll_results(poll_id)
+        # Get poll results
+        results = poll_db_service.get_poll_results(poll_id)
         
         return success_response(results, "Anket sonuçları başarıyla getirildi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
+    except ValueError as e:
+        return error_response(str(e), 404)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Anket sonuçları getirilemedi", 500)

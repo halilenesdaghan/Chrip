@@ -46,10 +46,6 @@ def setup_models(app_config):
     for model in models:
         model.Meta.region = app_config.get('AWS_DEFAULT_REGION', 'eu-central-1')
         
-        # Yerel DynamoDB host ayarlanmışsa, kullan
-        if app_config.get('DYNAMODB_ENDPOINT'):
-            model.Meta.host = app_config.get('DYNAMODB_ENDPOINT')
-
 def create_sample_users(count=10):
     """
     Örnek kullanıcılar oluşturur.
@@ -407,7 +403,6 @@ def main():
             'AWS_DEFAULT_REGION': os.getenv('AWS_DEFAULT_REGION', 'eu-central-1'),
             'AWS_ACCESS_KEY_ID': os.getenv('AWS_ACCESS_KEY_ID'),
             'AWS_SECRET_ACCESS_KEY': os.getenv('AWS_SECRET_ACCESS_KEY'),
-            'DYNAMODB_ENDPOINT': os.getenv('DYNAMODB_ENDPOINT')
         }
         
         # Model sınıflarını konfigüre et

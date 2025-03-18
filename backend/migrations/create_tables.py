@@ -43,10 +43,6 @@ def setup_models(app_config):
     for model in models:
         model.Meta.region = app_config.get('AWS_DEFAULT_REGION', 'eu-central-1')
         
-        # Yerel DynamoDB host ayarlanmışsa, kullan
-        if app_config.get('DYNAMODB_ENDPOINT'):
-            model.Meta.host = app_config.get('DYNAMODB_ENDPOINT')
-
 def main():
     """
     Ana fonksiyon. DynamoDB tablolarını oluşturur.
@@ -56,10 +52,9 @@ def main():
     try:
         # Flask uygulamasını simüle eden konfigürasyon
         app_config = {
-            'AWS_DEFAULT_REGION': os.getenv('AWS_DEFAULT_REGION', 'eu-central-1'),
+            'AWS_DEFAULT_REGION': os.getenv('AWS_DEFAULT_REGION', 'eu-north-1'),
             'AWS_ACCESS_KEY_ID': os.getenv('AWS_ACCESS_KEY_ID'),
             'AWS_SECRET_ACCESS_KEY': os.getenv('AWS_SECRET_ACCESS_KEY'),
-            'DYNAMODB_ENDPOINT': os.getenv('DYNAMODB_ENDPOINT')
         }
         
         # Model sınıflarını konfigüre et

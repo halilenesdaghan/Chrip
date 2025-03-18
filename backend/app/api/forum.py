@@ -1,63 +1,45 @@
-"""
-Forum API
--------
-Forum oluşturma, listeleme ve yönetimi için API endpoints.
-"""
-
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, g
 from marshmallow import Schema, fields, validate
-from app.services.forum_service import forum_service
+from app.services.ForumTableDatabaseService import ForumDatabaseService
 from app.utils.responses import success_response, error_response, list_response, created_response, updated_response, deleted_response
-from app.middleware.validation import validate_schema, validate_path_param, validate_query_params, is_uuid, is_positive_integer
-from app.middleware.auth import authenticate, authorize
-from app.utils.exceptions import NotFoundError, ValidationError, ForbiddenError
+from app.middleware.auth import authenticate
+from app.middleware.validation import validate_schema, is_positive_integer, is_uuid
 
-# Blueprint tanımla
+# Blueprint and Database Service
 forum_bp = Blueprint('forum', __name__)
+forum_db_service = ForumDatabaseService()
 
-# Şemalar
+# Schemas
 class ForumCreateSchema(Schema):
-    """Forum oluşturma şeması"""
-    baslik = fields.Str(required=True, validate=validate.Length(min=3, max=100), error_messages={'required': 'Forum başlığı gereklidir'})
+    baslik = fields.Str(required=True, validate=validate.Length(min=3, max=100))
     aciklama = fields.Str()
-    foto_urls = fields.List(fields.Url())
-    kategori = fields.Str()
     universite = fields.Str()
+    kategori = fields.Str()
+    foto_urls = fields.List(fields.Url())
 
 class ForumUpdateSchema(Schema):
-    """Forum güncelleme şeması"""
     baslik = fields.Str(validate=validate.Length(min=3, max=100))
     aciklama = fields.Str()
-    foto_urls = fields.List(fields.Url())
+    universite = fields.Str()
     kategori = fields.Str()
-
-class ForumReactionSchema(Schema):
-    """Forum reaksiyon şeması"""
-    reaction_type = fields.Str(required=True, validate=validate.OneOf(['begeni', 'begenmeme']), error_messages={'required': 'Reaksiyon türü gereklidir'})
+    foto_urls = fields.List(fields.Url())
 
 # Routes
 @forum_bp.route('/', methods=['GET'])
-@validate_query_params({
-    'page': is_positive_integer,
-    'per_page': is_positive_integer
-})
-def get_all_forums():
+def get_forums():
     """
-    Tüm forumları getirir.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve forums with optional filtering and pagination
     """
     try:
-        # Sorgu parametreleri
+        # Extract query parameters
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
         kategori = request.args.get('kategori')
         universite = request.args.get('universite')
         search = request.args.get('search')
         
-        # Forumları getir
-        result = forum_service.get_all_forums(
+        # Get forums
+        result = forum_db_service.get_forums(
             page=page,
             per_page=per_page,
             kategori=kategori,
@@ -66,8 +48,8 @@ def get_all_forums():
         )
         
         return list_response(
-            result['forums'],
-            result['meta']['total'],
+            result['forums'], 
+            result['meta']['total'], 
             result['meta']['page'],
             result['meta']['per_page'],
             "Forumlar başarıyla getirildi"
@@ -77,25 +59,18 @@ def get_all_forums():
         return error_response(str(e), 500)
 
 @forum_bp.route('/<forum_id>', methods=['GET'])
-@validate_path_param('forum_id', is_uuid)
+@validate_schema({'forum_id': fields.Str(validate=is_uuid)})
 def get_forum(forum_id):
     """
-    Forum bilgilerini getirir.
-    
-    Args:
-        forum_id (str): Forum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve a specific forum by ID
     """
     try:
-        # Forumu getir
-        forum = forum_service.get_forum_by_id(forum_id)
+        forum = forum_db_service.get_forum_by_id(forum_id)
         
-        return success_response(forum, "Forum başarıyla getirildi")
-    
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
+        if not forum:
+            return error_response("Forum bulunamadı", 404)
+        
+        return success_response(forum.to_dict(), "Forum başarıyla getirildi")
     
     except Exception as e:
         return error_response(str(e), 500)
@@ -105,174 +80,90 @@ def get_forum(forum_id):
 @validate_schema(ForumCreateSchema())
 def create_forum():
     """
-    Yeni forum oluşturur.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Create a new forum
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data from request
         data = request.validated_data
         
-        # Forum oluştur
-        forum = forum_service.create_forum(user_id, data)
+        # Create forum
+        forum = forum_db_service.create_forum(
+            user_id=user_id,
+            baslik=data['baslik'],
+            aciklama=data.get('aciklama', ''),
+            universite=data.get('universite'),
+            kategori=data.get('kategori'),
+            foto_urls=data.get('foto_urls')
+        )
         
-        return created_response(forum, "Forum başarıyla oluşturuldu")
+        return created_response(forum.to_dict(), "Forum başarıyla oluşturuldu")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Forum oluşturulamadı", 500)
 
 @forum_bp.route('/<forum_id>', methods=['PUT'])
 @authenticate
-@validate_path_param('forum_id', is_uuid)
 @validate_schema(ForumUpdateSchema())
 def update_forum(forum_id):
     """
-    Forum bilgilerini günceller.
-    
-    Args:
-        forum_id (str): Forum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Update an existing forum
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
-        data = request.validated_data
+        # Get validated update data
+        update_data = request.validated_data
         
-        # Forum güncelle
-        forum = forum_service.update_forum(forum_id, user_id, data)
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
         
-        return updated_response(forum, "Forum başarıyla güncellendi")
+        # Update forum
+        updated_forum = forum_db_service.update_forum(
+            forum_id=forum_id,
+            user_id=user_id,
+            update_data=update_data
+        )
+        
+        return updated_response(updated_forum.to_dict(), "Forum başarıyla güncellendi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ForbiddenError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Forum güncellenemedi", 500)
 
 @forum_bp.route('/<forum_id>', methods=['DELETE'])
 @authenticate
-@validate_path_param('forum_id', is_uuid)
 def delete_forum(forum_id):
     """
-    Forumu siler.
-    
-    Args:
-        forum_id (str): Forum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Soft delete a forum
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Forum sil
-        forum_service.delete_forum(forum_id, user_id)
+        # Retrieve the forum first
+        forum = forum_db_service.get_forum_by_id(forum_id)
+        
+        if not forum:
+            return error_response("Forum bulunamadı", 404)
+        
+        # Check if user is authorized to delete
+        if forum.acan_kisi_id != user_id:
+            return error_response("Bu forumu silme yetkiniz yok", 403)
+        
+        # Perform soft delete by updating is_active
+        update_data = {'is_active': False}
+        forum_db_service.update_forum(forum_id, user_id, update_data)
         
         return deleted_response("Forum başarıyla silindi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ForbiddenError as e:
-        return error_response(e.message, e.status_code)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
-
-@forum_bp.route('/<forum_id>/comments', methods=['GET'])
-@validate_path_param('forum_id', is_uuid)
-@validate_query_params({
-    'page': is_positive_integer,
-    'per_page': is_positive_integer
-})
-def get_forum_comments(forum_id):
-    """
-    Forum yorumlarını getirir.
-    
-    Args:
-        forum_id (str): Forum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
-    try:
-        # Sorgu parametreleri
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 20))
-        
-        # Yorumları getir
-        result = forum_service.get_forum_comments(forum_id, page, per_page)
-        
-        return list_response(
-            result['comments'],
-            result['meta']['total'],
-            result['meta']['page'],
-            result['meta']['per_page'],
-            "Forum yorumları başarıyla getirildi"
-        )
-    
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except Exception as e:
-        return error_response(str(e), 500)
-
-@forum_bp.route('/<forum_id>/react', methods=['POST'])
-@authenticate
-@validate_path_param('forum_id', is_uuid)
-@validate_schema(ForumReactionSchema())
-def react_to_forum(forum_id):
-    """
-    Foruma reaksiyon ekler (beğeni/beğenmeme).
-    
-    Args:
-        forum_id (str): Forum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
-    """
-    try:
-        # Mevcut kullanıcı ID'si
-        user_id = g.user.user_id
-        
-        # Şema tarafından doğrulanmış veriler
-        data = request.validated_data
-        
-        # Reaksiyon ekle
-        result = forum_service.react_to_forum(
-            forum_id, 
-            user_id, 
-            data['reaction_type']
-        )
-        
-        return success_response(result, "Reaksiyon başarıyla eklendi")
-    
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
-    except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Forum silinemedi", 500)

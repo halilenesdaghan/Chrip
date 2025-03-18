@@ -1,36 +1,46 @@
-"""
-Yorum API
--------
-Yorum oluşturma, listeleme ve yönetimi için API endpoints.
-"""
-
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, g
 from marshmallow import Schema, fields, validate
-from app.services.comment_service import comment_service
-from app.utils.responses import success_response, error_response, list_response, created_response, updated_response, deleted_response
-from app.middleware.validation import validate_schema, validate_path_param, validate_query_params, is_uuid, is_positive_integer
-from app.middleware.auth import authenticate, authorize
-from app.utils.exceptions import NotFoundError, ValidationError, ForbiddenError
+from app.services.CommentTableDatabaseService import CommentDatabaseService
+from app.utils.responses import (
+    success_response, 
+    error_response, 
+    list_response, 
+    created_response, 
+    updated_response, 
+    deleted_response
+)
+from app.middleware.auth import authenticate
+from app.middleware.validation import (
+    validate_schema,
+    validate_query_params,
+    is_uuid, 
+    is_positive_integer
+)
 
-# Blueprint tanımla
+# Blueprint and Database Service
 comment_bp = Blueprint('comment', __name__)
+comment_db_service = CommentDatabaseService()
 
-# Şemalar
+# Schemas
 class CommentCreateSchema(Schema):
-    """Yorum oluşturma şeması"""
+    """Comment creation schema"""
     forum_id = fields.Str(required=True, error_messages={'required': 'Forum ID zorunludur'})
     icerik = fields.Str(required=True, error_messages={'required': 'Yorum içeriği zorunludur'})
     foto_urls = fields.List(fields.Url())
-    ust_yorum_id = fields.Str()
+    ust_yorum_id = fields.Str()  # Optional parent comment ID
 
 class CommentUpdateSchema(Schema):
-    """Yorum güncelleme şeması"""
+    """Comment update schema"""
     icerik = fields.Str()
     foto_urls = fields.List(fields.Url())
 
 class CommentReactionSchema(Schema):
-    """Yorum reaksiyon şeması"""
-    reaction_type = fields.Str(required=True, validate=validate.OneOf(['begeni', 'begenmeme']), error_messages={'required': 'Reaksiyon türü gereklidir'})
+    """Comment reaction schema"""
+    reaction_type = fields.Str(
+        required=True, 
+        validate=validate.OneOf(['begeni', 'begenmeme']), 
+        error_messages={'required': 'Reaksiyon türü gereklidir'}
+    )
 
 # Routes
 @comment_bp.route('/', methods=['POST'])
@@ -38,198 +48,159 @@ class CommentReactionSchema(Schema):
 @validate_schema(CommentCreateSchema())
 def create_comment():
     """
-    Yeni yorum oluşturur.
-    
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Create a new comment
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
+        # Get validated data from request
         data = request.validated_data
         
-        # Yorum oluştur
-        comment = comment_service.create_comment(user_id, data)
+        # Create comment
+        comment = comment_db_service.create_comment(
+            user_id=user_id,
+            forum_id=data['forum_id'],
+            icerik=data['icerik'],
+            foto_urls=data.get('foto_urls'),
+            ust_yorum_id=data.get('ust_yorum_id')
+        )
         
-        return created_response(comment, "Yorum başarıyla oluşturuldu")
+        return created_response(comment.to_dict(), "Yorum başarıyla oluşturuldu")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Yorum oluşturulamadı", 500)
 
 @comment_bp.route('/<comment_id>', methods=['GET'])
-@validate_path_param('comment_id', is_uuid)
+@validate_schema({'comment_id': fields.Str(validate=is_uuid)})
 def get_comment(comment_id):
     """
-    Yorum bilgilerini getirir.
-    
-    Args:
-        comment_id (str): Yorum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve a specific comment by ID
     """
     try:
-        # Yorumu getir
-        comment = comment_service.get_comment_by_id(comment_id)
+        comment = comment_db_service.get_comment_by_id(comment_id)
         
-        return success_response(comment, "Yorum başarıyla getirildi")
-    
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
+        if not comment:
+            return error_response("Yorum bulunamadı", 404)
+        
+        return success_response(comment.to_dict(), "Yorum başarıyla getirildi")
     
     except Exception as e:
         return error_response(str(e), 500)
 
 @comment_bp.route('/<comment_id>', methods=['PUT'])
 @authenticate
-@validate_path_param('comment_id', is_uuid)
 @validate_schema(CommentUpdateSchema())
 def update_comment(comment_id):
     """
-    Yorum bilgilerini günceller.
-    
-    Args:
-        comment_id (str): Yorum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Update an existing comment
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
-        data = request.validated_data
+        # Get validated update data
+        update_data = request.validated_data
         
-        # Yorum güncelle
-        comment = comment_service.update_comment(comment_id, user_id, data)
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
         
-        return updated_response(comment, "Yorum başarıyla güncellendi")
+        # Update comment
+        updated_comment = comment_db_service.update_comment(
+            comment_id=comment_id,
+            user_id=user_id,
+            update_data=update_data
+        )
+        
+        return updated_response(updated_comment.to_dict(), "Yorum başarıyla güncellendi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ForbiddenError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Yorum güncellenemedi", 500)
 
 @comment_bp.route('/<comment_id>', methods=['DELETE'])
 @authenticate
-@validate_path_param('comment_id', is_uuid)
 def delete_comment(comment_id):
     """
-    Yorumu siler.
-    
-    Args:
-        comment_id (str): Yorum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Soft delete a comment
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Yorum sil
-        comment_service.delete_comment(comment_id, user_id)
+        # Delete comment
+        comment_db_service.delete_comment(
+            comment_id=comment_id,
+            user_id=user_id
+        )
         
         return deleted_response("Yorum başarıyla silindi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ForbiddenError as e:
-        return error_response(e.message, e.status_code)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Yorum silinemedi", 500)
 
 @comment_bp.route('/<comment_id>/replies', methods=['GET'])
-@validate_path_param('comment_id', is_uuid)
+@validate_schema({'comment_id': fields.Str(validate=is_uuid)})
 @validate_query_params({
     'page': is_positive_integer,
     'per_page': is_positive_integer
 })
 def get_comment_replies(comment_id):
     """
-    Yorum yanıtlarını getirir.
-    
-    Args:
-        comment_id (str): Yorum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Retrieve replies for a specific comment
     """
     try:
-        # Sorgu parametreleri
+        # Extract query parameters
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 20))
         
-        # Yanıtları getir
-        result = comment_service.get_comment_replies(comment_id, page, per_page)
+        # Get comment replies
+        result = comment_db_service.get_comment_replies(
+            comment_id=comment_id,
+            page=page,
+            per_page=per_page
+        )
         
         return list_response(
-            result['replies'],
-            result['meta']['total'],
+            result['replies'], 
+            result['meta']['total'], 
             result['meta']['page'],
             result['meta']['per_page'],
             "Yorum yanıtları başarıyla getirildi"
         )
-    
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
     
     except Exception as e:
         return error_response(str(e), 500)
 
 @comment_bp.route('/<comment_id>/react', methods=['POST'])
 @authenticate
-@validate_path_param('comment_id', is_uuid)
 @validate_schema(CommentReactionSchema())
 def react_to_comment(comment_id):
     """
-    Yoruma reaksiyon ekler (beğeni/beğenmeme).
-    
-    Args:
-        comment_id (str): Yorum ID'si
-        
-    Returns:
-        tuple: Yanıt ve HTTP durum kodu
+    Add a reaction to a comment
     """
     try:
-        # Mevcut kullanıcı ID'si
+        # Get current user ID from authentication middleware
         user_id = g.user.user_id
         
-        # Şema tarafından doğrulanmış veriler
+        # Get validated reaction type
         data = request.validated_data
         
-        # Reaksiyon ekle
-        result = comment_service.react_to_comment(
-            comment_id, 
-            user_id, 
-            data['reaction_type']
+        # Add reaction
+        result = comment_db_service.react_to_comment(
+            comment_id=comment_id,
+            user_id=user_id,
+            reaction_type=data['reaction_type']
         )
         
         return success_response(result, "Reaksiyon başarıyla eklendi")
     
-    except NotFoundError as e:
-        return error_response(e.message, e.status_code)
-    
-    except ValidationError as e:
-        return error_response(e.message, e.status_code, e.errors)
-    
+    except ValueError as e:
+        return error_response(str(e), 400)
     except Exception as e:
-        return error_response(str(e), 500)
+        return error_response("Reaksiyon eklenemedi", 500)

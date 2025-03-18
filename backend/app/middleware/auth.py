@@ -1,25 +1,26 @@
 """
-Kimlik Doğrulama Middleware
---------------------------
-JWT bazlı kimlik doğrulama için Flask middleware fonksiyonları.
+Authentication Middleware
+-----------------------
+Middleware functions for JWT-based authentication.
 """
 
 import jwt
 from functools import wraps
 from flask import request, current_app, g
 from app.utils.exceptions import AuthError, ForbiddenError, NotFoundError
-from app.models.user import UserModel
-
+from app.services.UserTableDatabaseService import UserDatabaseService
+from app.models.UserModel import UserModel
+import traceback
 
 def get_token_from_header():
     """
-    İstek başlıklarından Bearer token'ı alır.
+    Get Bearer token from request headers.
     
     Returns:
         str: JWT token
         
     Raises:
-        AuthError: Token bulunamazsa veya geçersiz formattaysa
+        AuthError: If token is missing or invalid format
     """
     auth_header = request.headers.get('Authorization')
     
@@ -39,29 +40,28 @@ def get_token_from_header():
     
     return parts[1]
 
-
 def decode_jwt_token(token):
     """
-    JWT token'ı doğrular ve içeriğini döndürür.
+    Validate and decode JWT token.
     
     Args:
         token (str): JWT token
         
     Returns:
-        dict: Token içeriği
+        dict: Token payload
         
     Raises:
-        AuthError: Token geçersizse veya süresi dolmuşsa
+        AuthError: If token is invalid or expired
     """
     try:
-        # Token'ı doğrula
-        decoded = jwt.decode(
+        # Validate token
+        payload = jwt.decode(
             token,
             current_app.config['JWT_SECRET_KEY'],
             algorithms=['HS256']
         )
         
-        return decoded
+        return payload
     
     except jwt.ExpiredSignatureError:
         raise AuthError('Token süresi dolmuş')
@@ -69,80 +69,78 @@ def decode_jwt_token(token):
     except jwt.InvalidTokenError:
         raise AuthError('Geçersiz token')
 
-
 def authenticate(f):
     """
-    Kimlik doğrulama decorator'ı.
+    Authentication decorator.
     
-    Kullanıcının kimliğini doğrular ve kullanıcı bilgilerini g.user'a ekler.
+    Validates user identity and adds user info to g.user.
     
     Args:
-        f: Decore edilecek fonksiyon
+        f: Function to decorate
         
     Returns:
-        function: Wrapped fonksiyon
+        function: Wrapped function
     """
     @wraps(f)
     def wrapper(*args, **kwargs):
-        # İstek başlıklarından token'ı al
+        # Get token from headers
         token = get_token_from_header()
-        
-        # Token'ı doğrula
+
+        # Validate token
         payload = decode_jwt_token(token)
         
-        # Kullanıcı ID'sini al
+        # Get user ID
         user_id = payload.get('sub')
         
         if not user_id:
             raise AuthError('Geçersiz token: Kullanıcı kimliği bulunamadı')
         
         try:
-            # Kullanıcıyı bul
-            user = UserModel.get(user_id)
+            # Get user from database
+            user_db = UserDatabaseService()
+            user: UserModel = user_db._get_user_by_user_id(user_id)
             
-            # Kullanıcının aktif olup olmadığını kontrol et
-            if not user.is_active:
+            # Check if user is active
+            if not user or not user.is_active:
                 raise AuthError('Hesabınız devre dışı bırakılmış')
             
-            # Kullanıcı bilgilerini g'ye ekle
+            # Add user to request context
             g.user = user
             g.user_id = user_id
             
-            # Son giriş zamanını güncelle (isteğe bağlı)
-            # user.update_last_login()
-            
-        except UserModel.DoesNotExist:
+        except Exception as e:
+            _traceback = traceback.format_exc()
+            print ("\033[93m" + _traceback + "\033[0m", flush=True)
             raise AuthError('Kullanıcı bulunamadı')
         
         return f(*args, **kwargs)
     
     return wrapper
 
-
 def authorize(required_roles):
     """
-    Yetkilendirme decorator'ı.
+    Authorization decorator.
     
-    Kullanıcının belirtilen rollere sahip olup olmadığını kontrol eder.
-    authenticate decorator'ından sonra kullanılmalıdır.
+    Checks if user has required roles.
+    Must be used after authenticate decorator.
     
     Args:
-        required_roles (str/list): Gerekli rol(ler)
+        required_roles (str/list): Required role(s)
         
     Returns:
-        function: Decorator fonksiyonu
+        function: Decorator function
     """
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            # Önce kimlik doğrulama yapılmış olmalı
+            # Authentication must be done first
             if not hasattr(g, 'user'):
                 raise AuthError('Yetkilendirme için kimlik doğrulama gerekli')
             
-            # required_roles string ise listeye çevir
+            # Convert required_roles to list if string
             roles = [required_roles] if isinstance(required_roles, str) else required_roles
             
-            # Kullanıcının rolünü kontrol et
+            # Check user role
             if g.user.role not in roles:
                 raise ForbiddenError('Bu işlem için yetkiniz bulunmamaktadır')
             
@@ -152,16 +150,15 @@ def authorize(required_roles):
     
     return decorator
 
-
 def get_current_user():
     """
-    Mevcut kimliği doğrulanmış kullanıcıyı döndürür.
+    Get authenticated user.
     
     Returns:
-        UserModel: Kimliği doğrulanmış kullanıcı
+        UserModel: Authenticated user
         
     Raises:
-        AuthError: Kimliği doğrulanmış kullanıcı yoksa
+        AuthError: If user is not authenticated
     """
     if not hasattr(g, 'user'):
         raise AuthError('Kimliği doğrulanmış kullanıcı bulunamadı')

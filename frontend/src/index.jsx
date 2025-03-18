@@ -5,6 +5,13 @@ import store from './store';
 import App from './App';
 import './styles/index.css';
 
+// uuid kütüphanesini package.json'a eklememiz gerek
+// npm install uuid
+
+// Mock API için gerekli paketleri yükleyin
+// Tarayıcının konsolunda "Module not found" hatası görürseniz
+// npm install uuid yapmanız gerekecek
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(

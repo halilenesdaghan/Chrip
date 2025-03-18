@@ -20,6 +20,7 @@ import GroupDetail from './pages/GroupDetail';
 import CreateGroup from './pages/CreateGroup';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
+import TestPage from './pages/TestPage'; // Test sayfasını import ediyoruz
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -46,6 +47,9 @@ const PublicRoute = ({ children }) => {
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Test sayfası (sorun giderme için) */}
+      <Route path="/test" element={<TestPage />} />
+      
       {/* Public routes (accessible by everyone) */}
       <Route path="/" element={<Home />} />
       

@@ -15,6 +15,9 @@ const App = () => {
     if (token) {
       dispatch(getCurrentUser());
     }
+    
+    // Debug mesajı
+    console.log("App bileşeni yüklendi!");
   }, [dispatch]);
 
   return (

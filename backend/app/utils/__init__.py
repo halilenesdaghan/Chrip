@@ -30,14 +30,6 @@ from app.utils.auth import (
     decode_token
 )
 
-from app.utils.dynamodb import (
-    initialize_dynamodb,
-    get_dynamodb_client,
-    get_dynamodb_resource,
-    create_tables,
-    generate_id
-)
-
 __all__ = [
     # Exceptions
     'ApiError',
@@ -62,10 +54,4 @@ __all__ = [
     'generate_token',
     'decode_token',
     
-    # DynamoDB
-    'initialize_dynamodb',
-    'get_dynamodb_client',
-    'get_dynamodb_resource',
-    'create_tables',
-    'generate_id'
 ]

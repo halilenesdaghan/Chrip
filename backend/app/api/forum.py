@@ -1,31 +1,51 @@
 from flask import Blueprint, request, g
 from marshmallow import Schema, fields, validate
-from app.services.ForumTableDatabaseService import ForumDatabaseService
 from app.utils.responses import success_response, error_response, list_response, created_response, updated_response, deleted_response
 from app.middleware.auth import authenticate
 from app.middleware.validation import validate_schema, is_positive_integer, is_uuid
+from app.services.forum_service import ForumService
+from app.models.UserModel import UserRoles
+import traceback
+
+"""
+API endpoints for forum operations.
+
+Endpoints:
+- /forums/ [GET]: Retrieve forums
+- /forums/<forum_id> [GET]: Retrieve a specific forum
+- /forums/ [POST]: Create a new forum
+- /forums/<forum_id> [PUT]: Update an existing forum
+- /forums/<forum_id> [DELETE]: Hard delete a forum
+"""
 
 # Blueprint and Database Service
 forum_bp = Blueprint('forum', __name__)
-forum_db_service = ForumDatabaseService()
 
 # Schemas
 class ForumCreateSchema(Schema):
-    baslik = fields.Str(required=True, validate=validate.Length(min=3, max=100))
-    aciklama = fields.Str()
-    universite = fields.Str()
-    kategori = fields.Str()
-    foto_urls = fields.List(fields.Url())
+    header = fields.Str(required=True, validate=validate.Length(min=3, max=100))
+    description = fields.Str()
+    category = fields.Str()
 
 class ForumUpdateSchema(Schema):
-    baslik = fields.Str(validate=validate.Length(min=3, max=100))
-    aciklama = fields.Str()
-    universite = fields.Str()
-    kategori = fields.Str()
-    foto_urls = fields.List(fields.Url())
+    header = fields.Str(validate=validate.Length(min=3, max=100))
+    description = fields.Str()
+    university = fields.Str()
+    category = fields.Str()
+    photo_urls = fields.List(fields.Url())
+
+class ForumRequestSchema(Schema):
+    page = fields.Int(validate=is_positive_integer)
+    per_page = fields.Int(validate=is_positive_integer)
+    category = fields.Str()
+    university = fields.Str()
+    search = fields.Str()
+
 
 # Routes
 @forum_bp.route('/', methods=['GET'])
+@authenticate
+@validate_schema(ForumRequestSchema())
 def get_forums():
     """
     Retrieve forums with optional filtering and pagination
@@ -34,18 +54,20 @@ def get_forums():
         # Extract query parameters
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
-        kategori = request.args.get('kategori')
-        universite = request.args.get('universite')
+        category = request.args.get('category')
+        university = request.args.get('university')
         search = request.args.get('search')
         
         # Get forums
-        result = forum_db_service.get_forums(
+        result = ForumService.get_forums(
             page=page,
             per_page=per_page,
-            kategori=kategori,
-            universite=universite,
+            category=category,
+            university=university,
             search=search
         )
+
+        print (result)
         
         return list_response(
             result['forums'], 
@@ -59,13 +81,13 @@ def get_forums():
         return error_response(str(e), 500)
 
 @forum_bp.route('/<forum_id>', methods=['GET'])
-@validate_schema({'forum_id': fields.Str(validate=is_uuid)})
+@authenticate
 def get_forum(forum_id):
     """
     Retrieve a specific forum by ID
     """
     try:
-        forum = forum_db_service.get_forum_by_id(forum_id)
+        forum = ForumService.get_forum_by_id(forum_id)
         
         if not forum:
             return error_response("Forum bulunamadı", 404)
@@ -90,13 +112,11 @@ def create_forum():
         data = request.validated_data
         
         # Create forum
-        forum = forum_db_service.create_forum(
-            user_id=user_id,
-            baslik=data['baslik'],
-            aciklama=data.get('aciklama', ''),
-            universite=data.get('universite'),
-            kategori=data.get('kategori'),
-            foto_urls=data.get('foto_urls')
+        forum = ForumService.create_forum(
+            creator_id=user_id,
+            header=data['header'],
+            description=data.get('description', ''),
+            category=data.get('category'),
         )
         
         return created_response(forum.to_dict(), "Forum başarıyla oluşturuldu")
@@ -124,7 +144,7 @@ def update_forum(forum_id):
         update_data = {k: v for k, v in update_data.items() if v is not None}
         
         # Update forum
-        updated_forum = forum_db_service.update_forum(
+        updated_forum = ForumService.update_forum_by_id(
             forum_id=forum_id,
             user_id=user_id,
             update_data=update_data
@@ -148,22 +168,22 @@ def delete_forum(forum_id):
         user_id = g.user.user_id
         
         # Retrieve the forum first
-        forum = forum_db_service.get_forum_by_id(forum_id)
+        forum = ForumService.get_forum_by_id(forum_id)
         
         if not forum:
             return error_response("Forum bulunamadı", 404)
         
         # Check if user is authorized to delete
-        if forum.acan_kisi_id != user_id:
+        if forum.creator_id != user_id or g.user.role != UserRoles.ADMIN:
             return error_response("Bu forumu silme yetkiniz yok", 403)
         
         # Perform soft delete by updating is_active
-        update_data = {'is_active': False}
-        forum_db_service.update_forum(forum_id, user_id, update_data)
+        ForumService.delete_forum_by_id(forum_id)
         
         return deleted_response("Forum başarıyla silindi")
     
     except ValueError as e:
         return error_response(str(e), 400)
     except Exception as e:
+        traceback.print_exc()
         return error_response("Forum silinemedi", 500)

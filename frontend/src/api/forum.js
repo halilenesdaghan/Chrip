@@ -2,8 +2,8 @@ import api from './index';
 
 const forumService = {
   // Tüm forumları getirme
-  getAllForums: async (page = 1, per_page = 10, kategori = null, universite = null, search = null) => {
-    const params = { page, per_page };
+  getAllForums: async ( kategori = null, universite = null, search = null) => {
+    const params = {};
     if (kategori) params.kategori = kategori;
     if (universite) params.universite = universite;
     if (search) params.search = search;
@@ -37,9 +37,9 @@ const forumService = {
   },
 
   // Forum yorumlarını getirme
-  getForumComments: async (forumId, page = 1, per_page = 20) => {
+  getForumComments: async (forumId) => {
     const response = await api.get(`/forums/${forumId}/comments`, {
-      params: { page, per_page }
+      params: {}
     });
     return response.data;
   },

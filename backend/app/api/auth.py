@@ -1,9 +1,3 @@
-"""
-Authentication API
----------------
-Endpoints for user registration, login, and authentication.
-"""
-
 from flask import Blueprint, request, jsonify, g
 from marshmallow import Schema, fields, validate
 from app.services.auth_service import AuthService
@@ -11,6 +5,19 @@ from app.utils.responses import success_response, error_response, created_respon
 from app.middleware.validation import validate_schema
 from app.middleware.auth import authenticate
 from app.utils.exceptions import AuthError, ValidationError
+
+"""
+API endpoints for user authentication.
+
+Endpoints:
+- /auth/register [POST]: Register a new user
+- /auth/login [POST]: User login
+- /auth/me [GET]: Get current user info
+- /auth/refresh-token [POST]: Refresh token
+- /auth/change-password [POST]: Change password
+- /auth/forgot-password [POST]: Request password reset
+- /auth/reset-password [POST]: Reset password
+"""
 
 # Define blueprint
 auth_bp = Blueprint('auth', __name__)
@@ -23,8 +30,8 @@ class RegisterSchema(Schema):
     email = fields.Email(required=True, error_messages={'required': 'E-posta gereklidir'})
     username = fields.Str(required=True, validate=validate.Length(min=3, max=30), error_messages={'required': 'Kullanıcı adı gereklidir'})
     password = fields.Str(required=True, validate=validate.Length(min=6), error_messages={'required': 'Şifre gereklidir'})
-    cinsiyet = fields.Str(validate=validate.OneOf(['Erkek', 'Kadın', 'Diğer']))
-    universite = fields.Str()
+    gender = fields.Str(validate=validate.OneOf(['Erkek', 'Kadın', 'Diğer']))
+    university = fields.Str()
 
 class LoginSchema(Schema):
     """Login schema"""

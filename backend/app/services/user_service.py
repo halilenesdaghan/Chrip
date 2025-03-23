@@ -23,7 +23,7 @@ class UserService:
     """
     
     def __init__(self):
-        self.user_db_service = UserDatabaseService()
+        self.user_db_service = UserDatabaseService.get_instance()
         self.forum_db_service = ForumDatabaseService()
         self.comment_db_service = CommentDatabaseService()
         self.poll_db_service = PollDatabaseService()

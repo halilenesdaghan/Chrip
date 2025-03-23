@@ -22,9 +22,9 @@ const validationSchema = Yup.object({
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password'), null], 'Şifreler eşleşmiyor')
     .required('Şifre tekrarı zorunludur'),
-  cinsiyet: Yup.string()
+  gender: Yup.string()
     .oneOf(['Erkek', 'Kadın', 'Diğer'], 'Geçerli bir cinsiyet seçiniz'),
-  universite: Yup.string(),
+  university: Yup.string(),
 });
 
 const RegisterForm = () => {
@@ -39,8 +39,8 @@ const RegisterForm = () => {
       username: '',
       password: '',
       confirmPassword: '',
-      cinsiyet: '',
-      universite: '',
+      gender: '',
+      university: '',
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -130,20 +130,20 @@ const RegisterForm = () => {
 
         <div className="mb-4">
           <label 
-            htmlFor="cinsiyet" 
+            htmlFor="gender" 
             className="block text-sm font-medium text-gray-700 mb-1"
           >
             Cinsiyet
           </label>
           <select
-            id="cinsiyet"
-            name="cinsiyet"
-            value={formik.values.cinsiyet}
+            id="gender"
+            name="gender"
+            value={formik.values.gender}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`
               block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400
-              ${formik.touched.cinsiyet && formik.errors.cinsiyet
+              ${formik.touched.gender && formik.errors.gender
                 ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                 : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
               }
@@ -154,21 +154,21 @@ const RegisterForm = () => {
             <option value="Kadın">Kadın</option>
             <option value="Diğer">Diğer</option>
           </select>
-          {formik.touched.cinsiyet && formik.errors.cinsiyet && (
-            <p className="mt-1 text-sm text-red-600">{formik.errors.cinsiyet}</p>
+          {formik.touched.gender && formik.errors.gender && (
+            <p className="mt-1 text-sm text-red-600">{formik.errors.gender}</p>
           )}
         </div>
 
         <Input
           label="Üniversite"
           type="text"
-          name="universite"
+          name="university"
           placeholder="Üniversitenizi girin (isteğe bağlı)"
-          value={formik.values.universite}
+          value={formik.values.university}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={formik.touched.universite && formik.errors.universite}
-          touched={formik.touched.universite}
+          error={formik.touched.university && formik.errors.university}
+          touched={formik.touched.university}
         />
 
         <Button

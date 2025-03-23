@@ -13,6 +13,16 @@ DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
 DEFAULT_COMMENTS_TABLE_NAME = os.getenv('COMMENTS_TABLE_NAME', 'Comments')
 
 class CommentDatabaseService:
+
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        """Static access method"""
+        if CommentDatabaseService.__instance is None:
+            CommentDatabaseService()
+        return CommentDatabaseService.__instance
+    
     def __init__(
         self, 
         region_name: str = DEFAULT_REGION, 
@@ -25,6 +35,10 @@ class CommentDatabaseService:
             region_name (str): AWS region
             table_name (str): DynamoDB table name
         """
+        if CommentDatabaseService.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            CommentDatabaseService.__instance = self
         # AWS Credentials
         self.access_key = os.getenv('AWS_ACCESS_KEY_ID', '').strip()
         self.secret_key = os.getenv('AWS_SECRET_ACCESS_KEY', '').strip()
@@ -40,14 +54,14 @@ class CommentDatabaseService:
         )
         self.dynamodb = self.session.resource('dynamodb')
         self.table = self.dynamodb.Table(table_name)
+        return
 
     def create_comment(
         self, 
         user_id: str, 
-        forum_id: str, 
-        icerik: str,
-        foto_urls: Optional[List[str]] = None,
-        ust_yorum_id: Optional[str] = None
+        commented_on_id: str, 
+        content: str,
+        photo_urls: Optional[List[str]] = None
     ) -> CommentModel:
         """
         Create a new comment in the database
@@ -55,8 +69,8 @@ class CommentDatabaseService:
         Args:
             user_id (str): ID of the user creating the comment
             forum_id (str): ID of the forum
-            icerik (str): Comment content
-            foto_urls (List[str], optional): Comment photo URLs
+            content (str): Comment content
+            photo_urls (List[str], optional): Comment photo URLs
             ust_yorum_id (str, optional): Parent comment ID for replies
         
         Returns:
@@ -66,7 +80,7 @@ class CommentDatabaseService:
             ValueError: If comment creation fails
         """
         # Validate inputs
-        if not icerik:
+        if not content:
             raise ValueError("Yorum içeriği zorunludur")
         
         # Generate unique comment ID
@@ -75,24 +89,22 @@ class CommentDatabaseService:
         # Prepare comment data
         comment_data = {
             'comment_id': comment_id,
-            'forum_id': forum_id,
-            'acan_kisi_id': user_id,
-            'icerik': icerik,
-            'acilis_tarihi': datetime.now().isoformat(),
-            'foto_urls': foto_urls or [],
-            'begeni_sayisi': 0,
-            'begenmeme_sayisi': 0,
-            'ust_yorum_id': ust_yorum_id,
-            'is_active': True
+            'commented_on_id': commented_on_id,
+            'creator_id': user_id,
+            'content': content,
+            'created_at': datetime.now().isoformat(),
+            'photo_urls': photo_urls or []
         }
+
+        new_comment = CommentModel(**comment_data)
         
         # Save to DynamoDB
         try:
-            self.table.put_item(Item=comment_data)
+            self.table.put_item(Item=new_comment.to_dict())
         except ClientError as e:
             raise ValueError(f"Error creating comment: {e}")
         
-        return CommentModel(**comment_data)
+        return new_comment
 
     def get_comment_by_id(self, comment_id: str) -> Optional[CommentModel]:
         """
@@ -115,9 +127,9 @@ class CommentDatabaseService:
         except ClientError:
             return None
 
-    def get_forum_comments(
+    def get_comments_for_id(
         self, 
-        forum_id: str,
+        commented_on_id: str,
         page: int = 1, 
         per_page: int = 20
     ) -> Dict[str, any]:
@@ -135,9 +147,9 @@ class CommentDatabaseService:
         try:
             # Retrieve main comments (top-level comments)
             scan_params = {
-                'FilterExpression': 'forum_id = :forum_id AND is_active = :active AND attribute_not_exists(ust_yorum_id)',
+                'FilterExpression': 'commented_on_id = :commented_on_id AND is_active = :active',
                 'ExpressionAttributeValues': {
-                    ':forum_id': forum_id,
+                    ':commented_on_id': commented_on_id,
                     ':active': True
                 }
             }
@@ -161,9 +173,9 @@ class CommentDatabaseService:
                 
                 # Fetch replies for this comment
                 replies_params = {
-                    'FilterExpression': 'forum_id = :forum_id AND is_active = :active AND ust_yorum_id = :parent_id',
+                    'FilterExpression': 'commented_on_id = :commented_on_id AND is_active = :active',
                     'ExpressionAttributeValues': {
-                        ':forum_id': forum_id,
+                        ':commented_on_id': commented_on_id,
                         ':active': True,
                         ':parent_id': comment.comment_id
                     }
@@ -199,6 +211,32 @@ class CommentDatabaseService:
                 }
             }
 
+    def get_comments_by_commented_on_id(self,
+        commented_on_id: str
+    ) -> List[CommentModel]:
+        """
+        Retrieve comments by commented-on ID
+        
+        Args:
+            commented_on_id (str): ID of the commented object
+        
+        Returns:
+            List[CommentModel]: List of comments
+        """
+        try:
+            response = self.table.query(
+                IndexName='commented_on_id-index',
+                KeyConditionExpression='commented_on_id = :commented_on_id',
+                ExpressionAttributeValues={':commented_on_id': commented_on_id}
+            )
+            
+            items = response.get('Items', [])
+            return [CommentModel(**item) for item in items]
+        
+        except ClientError:
+            return []
+        
+
     def update_comment(
         self, 
         comment_id: str, 
@@ -227,7 +265,7 @@ class CommentDatabaseService:
                 raise ValueError("Comment not found")
             
             # Check authorization
-            if comment.acan_kisi_id != user_id:
+            if comment.creator_id != user_id:
                 raise ValueError("Not authorized to update this comment")
             
             # Prepare update expression and values
@@ -235,7 +273,7 @@ class CommentDatabaseService:
             expr_attr_values = {}
             
             # Updatable fields
-            updatable_fields = ['icerik', 'foto_urls']
+            updatable_fields = ['content', 'photo_urls']
             
             for field in updatable_fields:
                 if field in update_data and update_data[field] is not None:
@@ -289,7 +327,7 @@ class CommentDatabaseService:
             
             # Check authorization
             is_authorized = (
-                comment.acan_kisi_id == user_id or
+                comment.creator_id == user_id or
                 # Additional authorization checks can be added here
                 # For example, forum owner or admin can delete comments
                 False
@@ -310,69 +348,6 @@ class CommentDatabaseService:
         except ClientError as e:
             raise ValueError(f"Error deleting comment: {e}")
 
-    def get_comment_replies(
-        self, 
-        comment_id: str,
-        page: int = 1, 
-        per_page: int = 20
-    ) -> Dict[str, any]:
-        """
-        Retrieve replies for a specific comment
-        
-        Args:
-            comment_id (str): Parent comment's unique identifier
-            page (int): Page number
-            per_page (int): Replies per page
-        
-        Returns:
-        Dict containing comment replies and metadata
-        """
-        try:
-            # Retrieve replies
-            scan_params = {
-                'FilterExpression': 'ust_yorum_id = :parent_id AND is_active = :active',
-                'ExpressionAttributeValues': {
-                    ':parent_id': comment_id,
-                    ':active': True
-                }
-            }
-            
-            # Perform scan
-            response = self.table.scan(**scan_params)
-            
-            # Process and paginate results
-            items = response.get('Items', [])
-            total_count = len(items)
-            
-            # Apply pagination
-            start_index = (page - 1) * per_page
-            end_index = start_index + per_page
-            paginated_items = items[start_index:end_index]
-            
-            # Convert to CommentModel objects
-            replies = [CommentModel(**item) for item in paginated_items]
-            
-            return {
-                'replies': [reply.to_dict() for reply in replies],
-                'meta': {
-                    'total': total_count,
-                    'page': page,
-                    'per_page': per_page,
-                    'total_pages': (total_count + per_page - 1) // per_page
-                }
-            }
-        
-        except ClientError:
-            return {
-                'replies': [],
-                'meta': {
-                    'total': 0,
-                    'page': page,
-                    'per_page': per_page,
-                    'total_pages': 0
-                }
-            }
-
     def react_to_comment(
         self, 
         comment_id: str, 
@@ -385,7 +360,7 @@ class CommentDatabaseService:
         Args:
             comment_id (str): Comment's unique identifier
             user_id (str): User adding the reaction
-            reaction_type (str): Type of reaction ('begeni' or 'begenmeme')
+            reaction_type (str): Type of reaction ('like' or 'dislike')
         
         Returns:
             Dict: Updated reaction counts
@@ -395,7 +370,7 @@ class CommentDatabaseService:
         """
         try:
             # Validate reaction type
-            if reaction_type not in ['begeni', 'begenmeme']:
+            if reaction_type not in ['like', 'dislike']:
                 raise ValueError("Geçersiz reaksiyon türü")
             
             # Retrieve existing comment
@@ -405,7 +380,7 @@ class CommentDatabaseService:
                 raise ValueError("Yorum bulunamadı")
             
             # Prepare update expression
-            update_expr = f"SET {reaction_type}_sayisi = {reaction_type}_sayisi + :increment"
+            update_expr = f"SET {reaction_type}_count = {reaction_type}_count + :increment"
             
             # Perform update
             self.table.update_item(
@@ -418,9 +393,36 @@ class CommentDatabaseService:
             updated_comment = self.get_comment_by_id(comment_id)
             
             return {
-                'begeni_sayisi': updated_comment.begeni_sayisi,
-                'begenmeme_sayisi': updated_comment.begenmeme_sayisi
+                'like_count': updated_comment.like_count,
+                'dislike_count': updated_comment.dislike_count
             }
         
         except ClientError as e:
             raise ValueError(f"Reaksiyon eklenemedi: {e}")
+
+    def get_sub_comments(
+        self, 
+        comment_id: str
+    ) -> List[CommentModel]:
+        """
+        Retrieve sub-comments for a specific comment
+        
+        Args:
+            comment_id (str): Comment's unique identifier
+        
+        Returns:
+            List[CommentModel]: List of sub-comments
+        """
+        try:
+            response = self.table.query(
+                IndexName='commented_on_id-index',
+                KeyConditionExpression='commented_on_id = :commented_on_id',
+                ExpressionAttributeValues={':commented_on_id': comment_id}
+            )
+            
+            items = response.get('Items', [])
+            return [CommentModel(**item) for item in items]
+        
+        except ClientError:
+            return []
+        

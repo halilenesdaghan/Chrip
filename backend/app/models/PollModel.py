@@ -62,41 +62,41 @@ class PollModel:
     
     Attributes:
         poll_id (str): Unique identifier for the poll
-        baslik (str): Poll title
-        aciklama (str, optional): Poll description
-        acan_kisi_id (str): ID of the user who created the poll
-        acilis_tarihi (str): Poll creation timestamp
+        header (str): Poll title
+        description (str, optional): Poll description
+        creator_id (str): ID of the user who created the poll
+        created_at (str): Poll creation timestamp
         bitis_tarihi (str, optional): Poll closing timestamp
         secenekler (List[PollOption]): List of poll options
         oylar (List[PollVote]): List of votes
-        universite (str, optional): Associated university
-        kategori (str, optional): Poll category
+        university (str, optional): Associated university
+        category (str, optional): Poll category
         is_active (bool): Poll active status
     """
     def __init__(
         self,
         poll_id: str = "",
-        baslik: str = "",
-        aciklama: Optional[str] = None,
-        acan_kisi_id: str = "",
-        acilis_tarihi: Optional[str] = None,
+        header: str = "",
+        description: Optional[str] = None,
+        creator_id: str = "",
+        created_at: Optional[str] = None,
         bitis_tarihi: Optional[str] = None,
         secenekler: Optional[List[Dict[str, any]]] = None,
         oylar: Optional[List[Dict[str, any]]] = None,
-        universite: Optional[str] = None,
-        kategori: Optional[str] = None,
+        university: Optional[str] = None,
+        category: Optional[str] = None,
         is_active: bool = True
     ):
         # Generate unique poll ID if not provided
         self.poll_id = poll_id or f"pol_{str(uuid.uuid4())}"
         
-        self.baslik = baslik
-        self.aciklama = aciklama or ""
-        self.acan_kisi_id = acan_kisi_id
-        self.acilis_tarihi = acilis_tarihi or datetime.now().isoformat()
+        self.header = header
+        self.description = description or ""
+        self.creator_id = creator_id
+        self.created_at = created_at or datetime.now().isoformat()
         self.bitis_tarihi = bitis_tarihi
-        self.universite = universite
-        self.kategori = kategori
+        self.university = university
+        self.category = category
         self.is_active = is_active
         
         # Convert option dictionaries to PollOption objects
@@ -194,17 +194,17 @@ class PollModel:
         """
         return {
             'poll_id': self.poll_id,
-            'baslik': self.baslik,
-            'aciklama': self.aciklama,
-            'acan_kisi_id': self.acan_kisi_id,
-            'acilis_tarihi': self.acilis_tarihi,
+            'header': self.header,
+            'description': self.description,
+            'creator_id': self.creator_id,
+            'created_at': self.created_at,
             'bitis_tarihi': self.bitis_tarihi,
-            'universite': self.universite,
-            'kategori': self.kategori,
+            'university': self.university,
+            'category': self.category,
             'is_active': self.is_active_poll(),
             'secenekler': [option.to_dict() for option in self.secenekler],
             'oylar': [vote.to_dict() for vote in self.oylar]
         }
 
     def __repr__(self):
-        return f"PollModel(poll_id={self.poll_id}, baslik={self.baslik})"
+        return f"PollModel(poll_id={self.poll_id}, header={self.header})"

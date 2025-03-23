@@ -13,7 +13,7 @@ group_db_service = GroupDatabaseService()
 class GroupCreateSchema(Schema):
     """Group creation schema"""
     grup_adi = fields.Str(required=True, validate=validate.Length(min=3, max=50))
-    aciklama = fields.Str()
+    description = fields.Str()
     logo_url = fields.Url()
     kapak_resmi_url = fields.Url()
     gizlilik = fields.Str(validate=validate.OneOf(['acik', 'kapali', 'gizli']))
@@ -22,7 +22,7 @@ class GroupCreateSchema(Schema):
 class GroupUpdateSchema(Schema):
     """Group update schema"""
     grup_adi = fields.Str(validate=validate.Length(min=3, max=50))
-    aciklama = fields.Str()
+    description = fields.Str()
     logo_url = fields.Url()
     kapak_resmi_url = fields.Url()
     gizlilik = fields.Str(validate=validate.OneOf(['acik', 'kapali', 'gizli']))
@@ -97,7 +97,7 @@ def create_group():
         group = group_db_service.create_group(
             user_id=user_id,
             grup_adi=data['grup_adi'],
-            aciklama=data.get('aciklama'),
+            description=data.get('description'),
             logo_url=data.get('logo_url'),
             kapak_resmi_url=data.get('kapak_resmi_url'),
             gizlilik=data.get('gizlilik', 'acik'),

@@ -14,9 +14,10 @@ const Forums = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [kategori, setKategori] = useState('');
-  const [universite, setUniversite] = useState('');
+  const [category, setCategory] = useState('');
+  const [university, setUniversity] = useState('');
   const [search, setSearch] = useState('');
+  const token = useSelector((state) => state.auth.token);
   
   // Filtre seçenekleri
   const filterOptions = {
@@ -35,16 +36,19 @@ const Forums = () => {
       
       // Filtre parametreleri
       const params = {
-        page: newPage,
-        per_page: 10,
       };
-      
+
       // Kategori ve üniversite filtreleri
-      if (kategori) params.kategori = kategori;
-      if (universite) params.universite = universite;
+      if (category) params.category = category;
+      if (university) params.university = university;
       if (search) params.search = search;
       
-      const response = await api.get('/forums', { params });
+      const response = await api.get('/forums/', {
+        params: { ...params},
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       
       if (response.data.status === 'success') {
         const data = response.data.data || [];
@@ -78,7 +82,7 @@ const Forums = () => {
   // İlk yüklemede forumları getir
   useEffect(() => {
     fetchForums(1, true);
-  }, [activeFilter, kategori, universite, search]);
+  }, [activeFilter, category, university, search]);
   
   // Daha fazla forum yükle
   const handleLoadMore = () => {
@@ -98,8 +102,8 @@ const Forums = () => {
   
   // Filtreleri sıfırla
   const resetFilters = () => {
-    setKategori('');
-    setUniversite('');
+    setCategory('');
+    setUniversity('');
     setSearch('');
     fetchForums(1, true);
     setShowFilters(false);
@@ -164,8 +168,8 @@ const Forums = () => {
               </label>
               <input
                 type="text"
-                value={kategori}
-                onChange={(e) => setKategori(e.target.value)}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
                 placeholder="Kategori girin"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
@@ -176,8 +180,8 @@ const Forums = () => {
               </label>
               <input
                 type="text"
-                value={universite}
-                onChange={(e) => setUniversite(e.target.value)}
+                value={university}
+                onChange={(e) => setUniversity(e.target.value)}
                 placeholder="Üniversite girin"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />

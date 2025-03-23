@@ -24,12 +24,12 @@ poll_db_service = PollDatabaseService()
 # Schemas
 class PollCreateSchema(Schema):
     """Poll creation schema"""
-    baslik = fields.Str(
+    header = fields.Str(
         required=True, 
         validate=validate.Length(min=3, max=100),
         error_messages={'required': 'Anket başlığı zorunludur'}
     )
-    aciklama = fields.Str()
+    description = fields.Str()
     secenekler = fields.List(
         fields.Str(), 
         required=True, 
@@ -37,16 +37,16 @@ class PollCreateSchema(Schema):
         error_messages={'required': 'En az iki seçenek gereklidir'}
     )
     bitis_tarihi = fields.DateTime(format='iso8601')
-    universite = fields.Str()
-    kategori = fields.Str()
+    university = fields.Str()
+    category = fields.Str()
 
 class PollUpdateSchema(Schema):
     """Poll update schema"""
-    baslik = fields.Str(validate=validate.Length(min=3, max=100))
-    aciklama = fields.Str()
+    header = fields.Str(validate=validate.Length(min=3, max=100))
+    description = fields.Str()
     secenekler = fields.List(fields.Str(), validate=validate.Length(min=2))
     bitis_tarihi = fields.DateTime(format='iso8601')
-    kategori = fields.Str()
+    category = fields.Str()
 
 class PollVoteSchema(Schema):
     """Poll voting schema"""
@@ -62,8 +62,8 @@ def get_polls():
         # Extract query parameters
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
-        kategori = request.args.get('kategori')
-        universite = request.args.get('universite')
+        category = request.args.get('category')
+        university = request.args.get('university')
         
         # Aktiflik filtresi (boolean kontrolü)
         aktif = None
@@ -78,8 +78,8 @@ def get_polls():
         result = poll_db_service.get_polls(
             page=page,
             per_page=per_page,
-            kategori=kategori,
-            universite=universite,
+            category=category,
+            university=university,
             aktif=aktif
         )
         
@@ -128,12 +128,12 @@ def create_poll():
         # Create poll
         poll = poll_db_service.create_poll(
             user_id=user_id,
-            baslik=data['baslik'],
+            header=data['header'],
             secenekler=data['secenekler'],
-            aciklama=data.get('aciklama'),
+            description=data.get('description'),
             bitis_tarihi=data.get('bitis_tarihi', '').isoformat() if data.get('bitis_tarihi') else None,
-            universite=data.get('universite'),
-            kategori=data.get('kategori')
+            university=data.get('university'),
+            category=data.get('category')
         )
         
         return created_response(poll.to_dict(), "Anket başarıyla oluşturuldu")
@@ -195,7 +195,7 @@ def delete_poll(poll_id):
             return error_response("Anket bulunamadı", 404)
         
         # Check if user is authorized to delete
-        if poll.acan_kisi_id != user_id:
+        if poll.creator_id != user_id:
             return error_response("Bu anketi silme yetkiniz yok", 403)
         
         # Perform soft delete

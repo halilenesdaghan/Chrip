@@ -74,9 +74,15 @@ def create_app(config=None):
     # Günlük kaydını yapılandır
     configure_logging(app)
     
+    
     # CORS'u etkinleştir
     if app.config.get('CORS_ENABLED', True):
+        # prints CORS state in green using ansi escape codes
+        print ("\033[92mCORS enabled\033[0m", flush=True)
         CORS(app)
+    else:
+        # prints CORS state in red using ansi escape codes
+        print ("\033[91mCORS disabled\033[0m", flush=True)
     
     # JWT'yi başlat
     JWTManager(app)

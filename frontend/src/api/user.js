@@ -28,7 +28,7 @@ const userService = {
   // Kullanıcı forumlarını getirme
   getUserForums: async (userId, page = 1, per_page = 10) => {
     const response = await api.get(`/users/${userId}/forums`, {
-      params: { page, per_page }
+      params: { }
     });
     return response.data;
   },
@@ -58,7 +58,7 @@ const userService = {
   // Kendi forumları
   getMyForums: async (page = 1, per_page = 10) => {
     const response = await api.get('/users/forums', {
-      params: { page, per_page }
+      params: {  }
     });
     return response.data;
   },

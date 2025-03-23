@@ -1,6 +1,11 @@
 from datetime import datetime, timedelta
 import uuid
 
+class UserRoles:
+    """User roles in the system"""
+    ADMIN = "admin"
+    USER = "user"
+
 class UserModel:
     """
     User model representing user attributes in the system.
@@ -14,7 +19,7 @@ class UserModel:
         is_active (bool): User account status
         created_at (str): Account creation timestamp
         last_login (str): Last login timestamp
-        universite (str, optional): User's university
+        university (str, optional): User's university
         profile_image_url (str, optional): URL of user's profile image
     """
     def __init__(
@@ -27,7 +32,8 @@ class UserModel:
         is_active: bool = True,
         created_at: str = "",
         last_login: str = "",
-        universite: str = "",
+        gender: str = "",
+        university: str = "",
         profile_image_url: str = "",
         groups: list = None,
         forums: list = None,
@@ -41,7 +47,8 @@ class UserModel:
         self.is_active = is_active
         self.created_at = created_at or datetime.now().isoformat()
         self.last_login = last_login
-        self.universite = universite
+        self.gender = gender
+        self.university = university
         self.profile_image_url = profile_image_url
         
         # Lists of related resources
@@ -64,7 +71,8 @@ class UserModel:
             'is_active': self.is_active,
             'created_at': self.created_at,
             'last_login': self.last_login,
-            'universite': self.universite,
+            'gender': self.gender,
+            'university': self.university,
             'profile_image_url': self.profile_image_url,
             'groups': self.groups,
             'forums': self.forums,

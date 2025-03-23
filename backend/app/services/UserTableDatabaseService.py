@@ -11,12 +11,26 @@ from botocore.exceptions import ClientError
 DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
 DEFAULT_USERS_TABLE_NAME = os.getenv('USERS_TABLE_NAME', 'Users')
 
+class EmailAlreadyExistsError(Exception):
+    pass
+
 class UserDatabaseService:
+
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        if UserDatabaseService.__instance is None:
+            UserDatabaseService()
+        return UserDatabaseService.__instance
+    
     def __init__(
         self, 
         region_name: str = DEFAULT_REGION, 
         table_name: str = DEFAULT_USERS_TABLE_NAME
     ):
+        if UserDatabaseService.__instance is not None:
+            raise Exception("This class is a singleton!")
         """
         Initialize DynamoDB User Service
         
@@ -40,12 +54,16 @@ class UserDatabaseService:
         self.dynamodb = self.session.resource('dynamodb')
         self.table = self.dynamodb.Table(table_name)
 
+        UserDatabaseService.__instance = self
+
+
     def create_user(
         self, 
         email: str, 
         username: str, 
         password: str, 
-        universite: Optional[str] = None,
+        university: Optional[str] = None,
+        gender: Optional[str] = 'Diğer',
         role: str = 'user'
     ) -> UserModel:
         """
@@ -55,7 +73,7 @@ class UserDatabaseService:
             email (str): User's email
             username (str): User's username
             password (str): User's password
-            universite (str, optional): User's university
+            university (str, optional): User's university
             role (str, optional): User's role
         
         Returns:
@@ -67,7 +85,7 @@ class UserDatabaseService:
         # Check if email already exists
         existing_email = self._get_user_by_email(email)
         if existing_email:
-            raise ValueError("Email already exists")
+            raise EmailAlreadyExistsError("Email already exists")
         
         # Check if username already exists
         existing_username = self._get_user_by_username(username)
@@ -87,7 +105,7 @@ class UserDatabaseService:
             'username': username,
             'password_hash': hashed_password,
             'role': role,
-            'universite': universite,
+            'university': university,
             'is_active': True,
             'created_at': datetime.now().isoformat(),
             'last_login': None,
@@ -105,7 +123,7 @@ class UserDatabaseService:
         
         return UserModel(**user_data)
 
-    def _get_user_by_user_id(self, user_id: str) -> Optional[dict]:
+    def _get_user_by_user_id(self, user_id: str) -> UserModel:
         """
         Get user by ID
         
@@ -128,7 +146,7 @@ class UserDatabaseService:
         except ClientError:
             return None
         
-    def _get_user_by_email(self, email: str) -> Optional[dict]:
+    def _get_user_by_email(self, email: str) -> UserModel:
         """
         Get user by email
         
@@ -143,11 +161,16 @@ class UserDatabaseService:
                 FilterExpression='email = :email',
                 ExpressionAttributeValues={':email': email}
             )
-            return response.get('Items', [])[0] if response.get('Items') else None
+            user_data = response.get('Items', [])
+            if len(user_data) != 0:
+                user_data = user_data[0]
+            else:
+                return None
+            return UserModel(**user_data)
         except ClientError:
             return None
 
-    def _get_user_by_username(self, username: str) -> Optional[dict]:
+    def _get_user_by_username(self, username: str) -> UserModel:
         """
         Get user by username
         
@@ -162,11 +185,64 @@ class UserDatabaseService:
                 FilterExpression='username = :username',
                 ExpressionAttributeValues={':username': username}
             )
-            return response.get('Items', [])[0] if response.get('Items') else None
+            user_data = response.get('Items', [])
+            if len(user_data) != 0:
+                user_data = user_data[0]
+            else:
+                return None
+            return UserModel(**user_data)
         except ClientError:
             return None
 
-    def login(self, username: str, password: str) -> Optional[UserModel]:
+    def _get_user_forums_by_user_id(self, user_id: str) -> List[str]:
+        """
+        Get user's forums by user ID
+        
+        Args:
+            user_id (str): User's ID
+        
+        Returns:
+            List[str]: List of forum IDs
+        """
+        user_data = self._get_user_by_user_id(user_id)
+        if not user_data:
+            return []
+        
+        return user_data.forums
+    
+    def _get_user_polls_by_user_id(self, user_id: str) -> List[str]:
+        """
+        Get user's polls by user ID
+        
+        Args:
+            user_id (str): User's ID
+        
+        Returns:
+            List[str]: List of poll IDs
+        """
+        user_data = self._get_user_by_user_id(user_id)
+        if not user_data:
+            return []
+        
+        return user_data.polls
+    
+    def _get_user_groups_by_user_id(self, user_id: str) -> List[str]:
+        """
+        Get user's groups by user ID
+        
+        Args:
+            user_id (str): User's ID
+        
+        Returns:
+            List[str]: List of group IDs
+        """
+        user_data = self._get_user_by_user_id(user_id)
+        if not user_data:
+            return []
+        
+        return user_data.groups
+
+    def login(self, username: str, password: str) -> UserModel:
         """
         Authenticate user
         
@@ -200,7 +276,9 @@ class UserDatabaseService:
         """
         try:
             self.table.update_item(
-                Key={'user_id': user_id},
+                Key={
+                    'user_id': user_id
+                    },
                 UpdateExpression='SET last_login = :last_login',
                 ExpressionAttributeValues={
                     ':last_login': datetime.now().isoformat()
@@ -209,3 +287,110 @@ class UserDatabaseService:
         except ClientError:
             # Log error or handle silently
             pass
+
+    def update_user(self, user_id: str, **params) -> UserModel:
+        """
+        Update user attributes in the database
+        
+        Args:
+            user_id (str): User's ID
+            **params: User attributes to update, can include:
+                - email: User's email
+                - username: User's username
+                - password: User's password (will be hashed)
+                - university: User's university
+                - role: User's role
+                - is_active: User's active status
+                - profile_image_url: URL to user's profile image
+                - groups: List of user's groups
+                - forums: List of user's forums
+                - polls: List of user's polls
+        
+        Returns:
+            Optional[UserModel]: Updated user object if successful, None otherwise
+        
+        Raises:
+            ValueError: If user does not exist or if email/username already exists
+        """
+        # Check if user exists
+        existing_user = self._get_user_by_user_id(user_id)
+        if not existing_user:
+            raise ValueError(f"User with ID {user_id} does not exist")
+        
+        # Check if updating email and it already exists
+        if 'email' in params and params['email'] != existing_user.email:
+            existing_email = self._get_user_by_email(params['email'])
+            if existing_email:
+                raise EmailAlreadyExistsError("Email already exists")
+        
+        # Check if updating username and it already exists
+        if 'username' in params and params['username'] != existing_user.username:
+            existing_username = self._get_user_by_username(params['username'])
+            if existing_username:
+                raise ValueError("Username already exists")
+        
+        # Hash password if provided
+        if 'password' in params:
+            params['password_hash'] = hash_password(params.pop('password'))
+        
+        # Build update expression and attribute values
+        update_expression_parts = []
+        expression_attribute_values = {}
+        
+        for key, value in params.items():
+            # Skip if key is not valid for user model
+            if key not in existing_user.to_dict() and key != 'password_hash':
+                continue
+            
+            update_expression_parts.append(f"{key} = :{key}")
+            expression_attribute_values[f":{key}"] = value
+        
+        # Return if nothing to update
+        if not update_expression_parts:
+            return existing_user
+        
+        update_expression = "SET " + ", ".join(update_expression_parts)
+        
+        # Update user in DynamoDB
+        try:
+            self.table.update_item(
+                Key={
+                    'user_id': user_id,
+                    'email': existing_user.email
+                    },
+                UpdateExpression=update_expression,
+                ExpressionAttributeValues=expression_attribute_values
+            )
+        except ClientError as e:
+            raise ValueError(f"Error updating user: {e}")
+        
+        # Get and return updated user
+        updated_user = self._get_user_by_user_id(user_id)
+        return updated_user
+    
+    def delete_user(self, user_id: str):
+        """
+        Delete user from the database
+        
+        Args:
+            user_id (str): User's ID
+        
+        Raises:
+            ValueError: If user does not exist
+        """
+        # Check if user exists
+        existing_user = self._get_user_by_user_id(user_id)
+        if not existing_user:
+            raise ValueError(f"User with ID {user_id} does not exist")
+        
+        # Delete user from DynamoDB
+        try:
+            self.table.delete_item(
+                Key={
+                    'user_id': user_id,
+                    'email': existing_user.email
+                }
+            )
+        except ClientError as e:
+            raise ValueError(f"Error deleting user: {e}")
+        

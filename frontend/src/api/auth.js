@@ -7,6 +7,8 @@ const authService = {
     if (response.data.status === 'success') {
       localStorage.setItem('token', response.data.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.data.user));
+
+      console.log('Token saved successfully', localStorage.getItem('token'));
     }
     return response.data;
   },
@@ -29,7 +31,16 @@ const authService = {
 
   // Mevcut kullanıcı bilgilerini getir
   getCurrentUser: async () => {
-    const response = await api.get('/auth/me');
+    const user_token = localStorage.getItem('token');
+    if (!user_token) {
+      return null;
+    }
+    const config = {
+      headers: {
+        Authorization: `Bearer ${user_token}`,
+      },
+    }
+    const response = await api.get('/auth/me', config);
     return response.data;
   },
 

@@ -97,7 +97,7 @@ def authenticate(f):
         
         try:
             # Get user from database
-            user_db = UserDatabaseService()
+            user_db = UserDatabaseService.get_instance()
             user: UserModel = user_db._get_user_by_user_id(user_id)
             
             # Check if user is active

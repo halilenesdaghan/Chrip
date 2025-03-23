@@ -32,8 +32,10 @@ def validate_schema(schema):
             else:
                 data = request.form.to_dict()
             
+            print (data, flush=True)
             # Şema ile doğrula
             errors = schema.validate(data)
+            
             
             if errors:
                 return error_response("Doğrulama hatası", 400, errors)
@@ -43,6 +45,7 @@ def validate_schema(schema):
             
             # Verileri request nesnesine ekle
             request.validated_data = validated_data
+            
             
             return f(*args, **kwargs)
         
@@ -66,6 +69,8 @@ def validate_path_param(param_name, validator_func):
         def wrapper(*args, **kwargs):
             if param_name in kwargs:
                 value = kwargs[param_name]
+                # prints the value of the parameter in purple using ansii color codes
+                print(f"\033[95m{value}\033[0m", flush=True)
                 
                 if not validator_func(value):
                     return error_response(f"Geçersiz {param_name} parametresi", 400)
@@ -114,9 +119,16 @@ def is_uuid(value):
         bool: Değer geçerli bir UUID ise True, değilse False
     """
     try:
+        # prints the value of the parameter in purple using ansii color codes
+        if value.startswith("usr_"):
+            value = value[len("usr_"):]
+        elif value.startswith("frm_"):
+            value = value[len("frm_"):]
         uuid_obj = uuid.UUID(str(value))
         return str(uuid_obj) == value or value.startswith(('usr_', 'frm_', 'cmt_', 'grp_', 'pol_', 'med_'))
     except (ValueError, AttributeError):
+        import traceback
+        print (traceback.format_exc())
         return False
 
 def is_positive_integer(value):

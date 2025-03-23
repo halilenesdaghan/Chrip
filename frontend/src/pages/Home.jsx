@@ -12,25 +12,28 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         
+        
+        console.log('Token:', token);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
         // Forumları getir
-        const forumsResponse = await api.get('/forums', {
-          params: { page: 1, per_page: 5 }
-        });
+        const forumsResponse = await api.get('/forums/', config);
         
         // Anketleri getir
-        const pollsResponse = await api.get('/polls', {
-          params: { page: 1, per_page: 5, aktif: true }
-        });
+        // const pollsResponse = await api.get('/polls', config);
         
         setForums(forumsResponse.data.data || []);
-        setPolls(pollsResponse.data.data || []);
+        // setPolls(pollsResponse.data.data || []);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Veriler yüklenirken bir hata oluştu.');

@@ -12,11 +12,24 @@ DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
 DEFAULT_FORUMS_TABLE_NAME = os.getenv('FORUMS_TABLE_NAME', 'Forums')
 
 class ForumDatabaseService:
+    
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        """ Static access method. """
+        if ForumDatabaseService.__instance is None:
+            ForumDatabaseService()
+        return ForumDatabaseService.__instance
     def __init__(
         self, 
         region_name: str = DEFAULT_REGION, 
         table_name: str = DEFAULT_FORUMS_TABLE_NAME
     ):
+        if ForumDatabaseService.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            ForumDatabaseService.__instance = self
         """
         Initialize DynamoDB Forum Service
         
@@ -42,23 +55,23 @@ class ForumDatabaseService:
 
     def create_forum(
         self, 
-        user_id: str, 
-        baslik: str, 
-        aciklama: str = "", 
-        universite: Optional[str] = None,
-        kategori: Optional[str] = None,
-        foto_urls: Optional[List[str]] = None
+        creator_id: str, 
+        header: str, 
+        description: str = "", 
+        university: Optional[str] = None,
+        category: Optional[str] = None,
+        photo_urls: Optional[List[str]] = None
     ) -> ForumModel:
         """
         Create a new forum in the database
         
         Args:
             user_id (str): ID of the user creating the forum
-            baslik (str): Forum title
-            aciklama (str, optional): Forum description
-            universite (str, optional): Associated university
-            kategori (str, optional): Forum category
-            foto_urls (List[str], optional): Forum photo URLs
+            header (str): Forum title
+            description (str, optional): Forum description
+            university (str, optional): Associated university
+            category (str, optional): Forum category
+            photo_urls (List[str], optional): Forum photo URLs
         
         Returns:
             ForumModel: Created forum object
@@ -72,17 +85,16 @@ class ForumDatabaseService:
         # Prepare forum data
         forum_data = {
             'forum_id': forum_id,
-            'baslik': baslik,
-            'aciklama': aciklama,
-            'acan_kisi_id': user_id,
-            'universite': universite,
-            'kategori': kategori,
-            'foto_urls': foto_urls or [],
-            'yorum_ids': [],
-            'begeni_sayisi': 0,
-            'begenmeme_sayisi': 0,
+            'header': header,
+            'description': description,
+            'creator_id': creator_id,
+            'university': university,
+            'category': category,
+            'photo_urls': photo_urls or [],
+            'like_count': 0,
+            'dislike_count': 0,
             'is_active': True,
-            'acilis_tarihi': datetime.now().isoformat()
+            'created_at': datetime.now().isoformat()
         }
         
         # Save to DynamoDB
@@ -118,8 +130,8 @@ class ForumDatabaseService:
         self, 
         page: int = 1, 
         per_page: int = 10,
-        kategori: Optional[str] = None,
-        universite: Optional[str] = None,
+        category: Optional[str] = None,
+        university: Optional[str] = None,
         search: Optional[str] = None
     ) -> Dict[str, any]:
         """
@@ -128,8 +140,8 @@ class ForumDatabaseService:
         Args:
             page (int): Page number
             per_page (int): Forums per page
-            kategori (str, optional): Filter by category
-            universite (str, optional): Filter by university
+            category (str, optional): Filter by category
+            university (str, optional): Filter by university
             search (str, optional): Search term
         
         Returns:
@@ -143,18 +155,18 @@ class ForumDatabaseService:
             }
             
             # Add category filter if provided
-            if kategori:
-                scan_params['FilterExpression'] += ' AND kategori = :kategori'
-                scan_params['ExpressionAttributeValues'][':kategori'] = kategori
+            if category:
+                scan_params['FilterExpression'] += ' AND category = :category'
+                scan_params['ExpressionAttributeValues'][':category'] = category
             
             # Add university filter if provided
-            if universite:
-                scan_params['FilterExpression'] += ' AND universite = :universite'
-                scan_params['ExpressionAttributeValues'][':universite'] = universite
+            if university:
+                scan_params['FilterExpression'] += ' AND university = :university'
+                scan_params['ExpressionAttributeValues'][':university'] = university
             
             # Add search filter if provided
             if search:
-                scan_params['FilterExpression'] += ' AND contains(baslik, :search)'
+                scan_params['FilterExpression'] += ' AND contains(header, :search)'
                 scan_params['ExpressionAttributeValues'][':search'] = search
             
             # Perform scan
@@ -221,7 +233,7 @@ class ForumDatabaseService:
                 raise ValueError("Forum not found")
             
             # Check authorization
-            if forum.acan_kisi_id != user_id:
+            if forum.creator_id != user_id:
                 raise ValueError("Not authorized to update this forum")
             
             # Prepare update expression and values
@@ -229,7 +241,7 @@ class ForumDatabaseService:
             expr_attr_values = {}
             
             # Updatable fields
-            updatable_fields = ['baslik', 'aciklama', 'foto_urls', 'kategori']
+            updatable_fields = ['header', 'description', 'photo_urls', 'category']
             
             for field in updatable_fields:
                 if field in update_data and update_data[field] is not None:
@@ -255,3 +267,27 @@ class ForumDatabaseService:
         
         except ClientError as e:
             raise ValueError(f"Error updating forum: {e}")
+        
+    def delete_forum(self, forum_id: str):
+        """
+        Hard delete a forum
+        
+        Args:
+            forum_id (str): Forum's unique identifier
+
+        Raises:
+            ValueError: If forum does not exist
+        """
+        try:
+            # Retrieve forum first
+            forum = self.get_forum_by_id(forum_id)
+            
+            if not forum:
+                raise ValueError("Forum not found")
+            
+            # Perform delete
+            self.table.delete_item(Key={'forum_id': forum_id})
+        
+        except ClientError as e:
+            raise ValueError(f"Error deleting forum: {e}")
+        

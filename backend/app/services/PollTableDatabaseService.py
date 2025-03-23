@@ -42,24 +42,24 @@ class PollDatabaseService:
     def create_poll(
         self, 
         user_id: str, 
-        baslik: str, 
+        header: str, 
         secenekler: List[str],
-        aciklama: Optional[str] = None,
+        description: Optional[str] = None,
         bitis_tarihi: Optional[str] = None,
-        universite: Optional[str] = None,
-        kategori: Optional[str] = None
+        university: Optional[str] = None,
+        category: Optional[str] = None
     ) -> PollModel:
         """
         Create a new poll in the database
         
         Args:
             user_id (str): ID of the user creating the poll
-            baslik (str): Poll title
+            header (str): Poll title
             secenekler (List[str]): List of poll options
-            aciklama (str, optional): Poll description
+            description (str, optional): Poll description
             bitis_tarihi (str, optional): Poll end date
-            universite (str, optional): Associated university
-            kategori (str, optional): Poll category
+            university (str, optional): Associated university
+            category (str, optional): Poll category
         
         Returns:
             PollModel: Created poll object
@@ -96,15 +96,15 @@ class PollDatabaseService:
         # Prepare poll data
         poll_data = {
             'poll_id': poll_id,
-            'baslik': baslik,
-            'aciklama': aciklama or '',
-            'acan_kisi_id': user_id,
-            'acilis_tarihi': datetime.now().isoformat(),
+            'header': header,
+            'description': description or '',
+            'creator_id': user_id,
+            'created_at': datetime.now().isoformat(),
             'bitis_tarihi': bitis_tarihi,
             'secenekler': poll_options,
             'oylar': [],
-            'universite': universite,
-            'kategori': kategori,
+            'university': university,
+            'category': category,
             'is_active': True
         }
         
@@ -141,8 +141,8 @@ class PollDatabaseService:
         self, 
         page: int = 1, 
         per_page: int = 10,
-        kategori: Optional[str] = None,
-        universite: Optional[str] = None,
+        category: Optional[str] = None,
+        university: Optional[str] = None,
         aktif: Optional[bool] = None
     ) -> Dict[str, any]:
         """
@@ -151,8 +151,8 @@ class PollDatabaseService:
         Args:
             page (int): Page number
             per_page (int): Polls per page
-            kategori (str, optional): Filter by category
-            universite (str, optional): Filter by university
+            category (str, optional): Filter by category
+            university (str, optional): Filter by university
             aktif (bool, optional): Filter by active status
         
         Returns:
@@ -166,14 +166,14 @@ class PollDatabaseService:
             }
             
             # Add category filter if provided
-            if kategori:
-                scan_params['FilterExpression'] += ' AND kategori = :kategori'
-                scan_params['ExpressionAttributeValues'][':kategori'] = kategori
+            if category:
+                scan_params['FilterExpression'] += ' AND category = :category'
+                scan_params['ExpressionAttributeValues'][':category'] = category
             
             # Add university filter if provided
-            if universite:
-                scan_params['FilterExpression'] += ' AND universite = :universite'
-                scan_params['ExpressionAttributeValues'][':universite'] = universite
+            if university:
+                scan_params['FilterExpression'] += ' AND university = :university'
+                scan_params['ExpressionAttributeValues'][':university'] = university
             
             # Perform scan
             response = self.table.scan(**scan_params)
@@ -248,7 +248,7 @@ class PollDatabaseService:
                 raise ValueError("Poll not found")
             
             # Check authorization
-            if poll.acan_kisi_id != user_id:
+            if poll.creator_id != user_id:
                 raise ValueError("Not authorized to update this poll")
             
             # Prepare update expression and values
@@ -256,7 +256,7 @@ class PollDatabaseService:
             expr_attr_values = {}
             
             # Updatable fields
-            updatable_fields = ['baslik', 'aciklama', 'bitis_tarihi', 'kategori']
+            updatable_fields = ['header', 'description', 'bitis_tarihi', 'category']
             
             for field in updatable_fields:
                 if field in update_data and update_data[field] is not None:
@@ -338,7 +338,7 @@ class PollDatabaseService:
                 raise ValueError("Poll not found")
             
             # Check authorization
-            if poll.acan_kisi_id != user_id:
+            if poll.creator_id != user_id:
                 raise ValueError("Not authorized to delete this poll")
             
             # Perform soft delete
@@ -464,8 +464,8 @@ class PollDatabaseService:
             return {
                 'poll': {
                     'poll_id': poll.poll_id,
-                    'baslik': poll.baslik,
-                    'aciklama': poll.aciklama,
+                    'header': poll.header,
+                    'description': poll.description,
                     'aktif': poll.is_active_poll()
                 },
                 'results': poll.get_results(),

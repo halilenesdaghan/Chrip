@@ -45,7 +45,7 @@ class PollService:
                 raise NotFoundError("Kullanıcı bulunamadı")
             
             # Gerekli alanları doğrula
-            if 'baslik' not in poll_data or not poll_data['baslik']:
+            if 'header' not in poll_data or not poll_data['header']:
                 raise ValidationError("Anket başlığı zorunludur")
             
             if 'secenekler' not in poll_data or len(poll_data['secenekler']) < 2:
@@ -63,12 +63,12 @@ class PollService:
             
             # Anket oluştur
             poll = PollModel(
-                baslik=poll_data['baslik'],
-                aciklama=poll_data.get('aciklama', ''),
-                acan_kisi_id=user_id,
+                header=poll_data['header'],
+                description=poll_data.get('description', ''),
+                creator_id=user_id,
                 bitis_tarihi=bitis_tarihi,
-                universite=poll_data.get('universite', user.universite),
-                kategori=poll_data.get('kategori')
+                university=poll_data.get('university', user.university),
+                category=poll_data.get('category')
             )
             
             # Seçenekleri ekle
@@ -139,14 +139,14 @@ class PollService:
                 raise NotFoundError("Anket bulunamadı")
             
             # Yetki kontrolü
-            if poll.acan_kisi_id != user_id:
+            if poll.creator_id != user_id:
                 # Admin yetkisi kontrolü eklenebilir
                 user = UserModel.get(user_id)
                 if user.role != 'admin':
                     raise ForbiddenError("Bu anketi düzenleme yetkiniz yok")
             
             # Güncellenebilir alanlar
-            fields_to_update = ['baslik', 'aciklama', 'kategori', 'bitis_tarihi']
+            fields_to_update = ['header', 'description', 'category', 'bitis_tarihi']
             
             # Alanları güncelle
             updated = False
@@ -211,7 +211,7 @@ class PollService:
                 raise NotFoundError("Anket bulunamadı")
             
             # Yetki kontrolü
-            if poll.acan_kisi_id != user_id:
+            if poll.creator_id != user_id:
                 # Admin yetkisi kontrolü eklenebilir
                 user = UserModel.get(user_id)
                 if user.role != 'admin':
@@ -227,15 +227,15 @@ class PollService:
         except DoesNotExist:
             raise NotFoundError("Anket bulunamadı")
     
-    def get_all_polls(self, page=1, per_page=10, kategori=None, universite=None, aktif=None):
+    def get_all_polls(self, page=1, per_page=10, category=None, university=None, aktif=None):
         """
         Tüm anketleri getirir.
         
         Args:
             page (int, optional): Sayfa numarası
             per_page (int, optional): Sayfa başına anket sayısı
-            kategori (str, optional): Kategori filtresi
-            universite (str, optional): Üniversite filtresi
+            category (str, optional): category filtresi
+            university (str, optional): Üniversite filtresi
             aktif (bool, optional): Aktiflik durumu filtresi
             
         Returns:
@@ -247,12 +247,12 @@ class PollService:
             if not poll.is_active:
                 return False
             
-            # Kategori filtresi
-            if kategori and poll.kategori != kategori:
+            # category filtresi
+            if category and poll.category != category:
                 return False
             
             # Üniversite filtresi
-            if universite and poll.universite != universite:
+            if university and poll.university != university:
                 return False
             
             # Aktiflik filtresi (anketi açık mı kapalı mı)
@@ -369,8 +369,8 @@ class PollService:
             return {
                 'poll': {
                     'poll_id': poll.poll_id,
-                    'baslik': poll.baslik,
-                    'aciklama': poll.aciklama,
+                    'header': poll.header,
+                    'description': poll.description,
                     'aktif': poll.is_active()
                 },
                 'results': poll.get_results(),

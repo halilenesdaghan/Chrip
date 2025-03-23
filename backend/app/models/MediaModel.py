@@ -24,7 +24,7 @@ class MediaModel(BaseModel):
         yuklenme_tarihi (str): Upload date (ISO format)
         ilgili_model (str): Related model type (forum, comment, user, group, poll)
         ilgili_id (str): Related model ID
-        aciklama (str): File description
+        description (str): File description
         meta_data (dict): Additional metadata
     """
     
@@ -41,7 +41,7 @@ class MediaModel(BaseModel):
                  yuklenme_tarihi=None,
                  ilgili_model=None,
                  ilgili_id=None,
-                 aciklama=None,
+                 description=None,
                  meta_data=None,
                  is_active=True,
                  created_at=None,
@@ -59,7 +59,7 @@ class MediaModel(BaseModel):
         self.yuklenme_tarihi = yuklenme_tarihi or self.created_at
         self.ilgili_model = ilgili_model
         self.ilgili_id = ilgili_id
-        self.aciklama = aciklama
+        self.description = description
         self.meta_data = meta_data or {}
     
     def is_image(self):

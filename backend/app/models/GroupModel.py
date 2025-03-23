@@ -39,7 +39,7 @@ class GroupModel:
     Attributes:
         group_id (str): Unique identifier for the group
         grup_adi (str): Group name
-        aciklama (str): Group description
+        description (str): Group description
         olusturan_id (str): ID of the user who created the group
         olusturulma_tarihi (str): Group creation timestamp
         logo_url (str, optional): Group logo URL
@@ -54,7 +54,7 @@ class GroupModel:
         self,
         group_id: str = "",
         grup_adi: str = "",
-        aciklama: str = "",
+        description: str = "",
         olusturan_id: str = "",
         olusturulma_tarihi: str = "",
         logo_url: Optional[str] = None,
@@ -69,7 +69,7 @@ class GroupModel:
         self.group_id = group_id or f"grp_{str(uuid.uuid4())}"
         
         self.grup_adi = grup_adi
-        self.aciklama = aciklama
+        self.description = description
         self.olusturan_id = olusturan_id
         self.olusturulma_tarihi = olusturulma_tarihi or datetime.now().isoformat()
         self.logo_url = logo_url
@@ -97,7 +97,7 @@ class GroupModel:
         return {
             'group_id': self.group_id,
             'grup_adi': self.grup_adi,
-            'aciklama': self.aciklama,
+            'description': self.description,
             'olusturan_id': self.olusturan_id,
             'olusturulma_tarihi': self.olusturulma_tarihi,
             'logo_url': self.logo_url,

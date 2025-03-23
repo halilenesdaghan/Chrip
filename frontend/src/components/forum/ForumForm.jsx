@@ -9,12 +9,12 @@ import MediaUploader from '../media/MediaUploader';
 
 // Form doğrulama şeması
 const validationSchema = Yup.object({
-  baslik: Yup.string()
+  header: Yup.string()
     .required('Başlık zorunludur')
     .min(3, 'Başlık en az 3 karakter olmalıdır')
     .max(100, 'Başlık en fazla 100 karakter olabilir'),
-  aciklama: Yup.string(),
-  kategori: Yup.string(),
+  description: Yup.string(),
+  category: Yup.string(),
 });
 
 const ForumForm = ({ initialValues = {}, onSubmit, isLoading = false, isEdit = false }) => {
@@ -23,9 +23,9 @@ const ForumForm = ({ initialValues = {}, onSubmit, isLoading = false, isEdit = f
   // Form başlangıç değerleri
   const formik = useFormik({
     initialValues: {
-      baslik: initialValues.baslik || '',
-      aciklama: initialValues.aciklama || '',
-      kategori: initialValues.kategori || '',
+      header: initialValues.header || '',
+      description: initialValues.description || '',
+      category: initialValues.category || '',
       foto_urls: initialValues.foto_urls || [],
     },
     validationSchema,
@@ -36,15 +36,15 @@ const ForumForm = ({ initialValues = {}, onSubmit, isLoading = false, isEdit = f
 
   // Medya ekle
   const handleMediaAdd = (mediaUrl) => {
-    const updatedUrls = [...formik.values.foto_urls, mediaUrl];
-    formik.setFieldValue('foto_urls', updatedUrls);
+    const updatedUrls = [...formik.values.photo_urls, mediaUrl];
+    formik.setFieldValue('photo_urls', updatedUrls);
     setShowMediaUploader(false);
   };
 
   // Medya kaldır
   const handleRemoveMedia = (index) => {
-    const updatedUrls = formik.values.foto_urls.filter((_, i) => i !== index);
-    formik.setFieldValue('foto_urls', updatedUrls);
+    const updatedUrls = formik.values.photo_urls.filter((_, i) => i !== index);
+    formik.setFieldValue('photo_urls', updatedUrls);
   };
 
   return (
@@ -55,56 +55,56 @@ const ForumForm = ({ initialValues = {}, onSubmit, isLoading = false, isEdit = f
           <Input
             label="Başlık"
             type="text"
-            name="baslik"
+            name="header"
             placeholder="Forum başlığını girin"
-            value={formik.values.baslik}
+            value={formik.values.header}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={formik.touched.baslik && formik.errors.baslik}
-            touched={formik.touched.baslik}
+            error={formik.touched.header && formik.errors.header}
+            touched={formik.touched.header}
             required
           />
 
           {/* Açıklama */}
           <div className="mb-4">
             <label 
-              htmlFor="aciklama" 
+              htmlFor="description" 
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               Açıklama
             </label>
             <textarea
-              id="aciklama"
-              name="aciklama"
+              id="description"
+              name="description"
               rows={4}
               placeholder="Açıklamanızı girin"
-              value={formik.values.aciklama}
+              value={formik.values.description}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               className={`
                 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400
-                ${formik.touched.aciklama && formik.errors.aciklama
+                ${formik.touched.description && formik.errors.description
                   ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                 }
               `}
             />
-            {formik.touched.aciklama && formik.errors.aciklama && (
-              <p className="mt-1 text-sm text-red-600">{formik.errors.aciklama}</p>
+            {formik.touched.description && formik.errors.description && (
+              <p className="mt-1 text-sm text-red-600">{formik.errors.description}</p>
             )}
           </div>
 
-          {/* Kategori */}
+          {/* category */}
           <Input
             label="Kategori"
             type="text"
-            name="kategori"
+            name="category"
             placeholder="Kategori girin"
-            value={formik.values.kategori}
+            value={formik.values.category}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={formik.touched.kategori && formik.errors.kategori}
-            touched={formik.touched.kategori}
+            error={formik.touched.category && formik.errors.category}
+            touched={formik.touched.category}
           />
 
           {/* Medya Görüntüleme */}

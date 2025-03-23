@@ -8,45 +8,45 @@ class CommentModel:
     
     Attributes:
         comment_id (str): Unique identifier for the comment
-        forum_id (str): ID of the forum where the comment is posted
-        acan_kisi_id (str): ID of the user who created the comment
-        icerik (str): Comment content
-        acilis_tarihi (str): Comment creation timestamp
-        foto_urls (List[str]): URLs of photos in the comment
-        begeni_sayisi (int): Number of likes
-        begenmeme_sayisi (int): Number of dislikes
-        ust_yorum_id (str, optional): ID of parent comment (for replies)
+        commented_on_id (str): ID of the forum/poll/comment the comment is posted on
+        creator_id (str): ID of the user who created the comment
+        content (str): Comment content
+        created_at (str): Comment creation timestamp
+        photo_urls (List[str]): URLs of photos in the comment
+        like_count (int): Number of likes
+        dislike_count (int): Number of dislikes
+        sub_comment_list (List[CommentModel]): List of sub-comments
+        latest_sub_comment_id (str): ID of the latest sub-comment
         is_active (bool): Comment active status
     """
     def __init__(
         self,
         comment_id: str = "",
-        forum_id: str = "",
-        acan_kisi_id: str = "",
-        icerik: str = "",
-        acilis_tarihi: Optional[str] = None,
-        foto_urls: Optional[List[str]] = None,
-        begeni_sayisi: int = 0,
-        begenmeme_sayisi: int = 0,
-        ust_yorum_id: Optional[str] = None,
+        commented_on_id: str = "",
+        creator_id: str = "",
+        content: str = "",
+        created_at: Optional[str] = None,
+        photo_urls: Optional[List[str]] = None,
+        like_count: int = 0,
+        dislike_count: int = 0,
+        sub_comment_list: Optional[List['str']] = None,
+        latest_sub_comment: 'CommentModel' = None,
         is_active: bool = True
     ):
         # Generate unique comment ID if not provided
         self.comment_id = comment_id or f"cmt_{str(uuid.uuid4())}"
         
-        self.forum_id = forum_id
-        self.acan_kisi_id = acan_kisi_id
-        self.icerik = icerik
-        self.acilis_tarihi = acilis_tarihi or datetime.now().isoformat()
-        self.foto_urls = foto_urls or []
-        self.begeni_sayisi = begeni_sayisi
-        self.begenmeme_sayisi = begenmeme_sayisi
-        self.ust_yorum_id = ust_yorum_id
+        self.commented_on_id = commented_on_id
+        self.creator_id = creator_id
+        self.content = content
+        self.created_at = created_at or datetime.now().isoformat()
+        self.photo_urls = photo_urls or []
+        self.like_count = like_count
+        self.dislike_count = dislike_count
+        self.sub_comment_list = sub_comment_list or []
+        self.latest_sub_comment = latest_sub_comment or None
         self.is_active = is_active
         
-        # Placeholder for potential replies (can be populated separately)
-        self.yanit_listesi = []
-
     def add_photo(self, photo_url: str):
         """
         Add a photo URL to the comment
@@ -54,35 +54,16 @@ class CommentModel:
         Args:
             photo_url (str): URL of the photo to add
         """
-        if photo_url not in self.foto_urls:
-            self.foto_urls.append(photo_url)
+        if photo_url not in self.photo_urls:
+            self.photo_urls.append(photo_url)
 
     def add_like(self):
         """Increment likes count"""
-        self.begeni_sayisi += 1
+        self.like_count += 1
 
     def add_dislike(self):
         """Increment dislikes count"""
-        self.begenmeme_sayisi += 1
-
-    def add_reply(self, reply_comment):
-        """
-        Add a reply to this comment
-        
-        Args:
-            reply_comment (CommentModel): Reply comment to add
-        """
-        if reply_comment not in self.yanit_listesi:
-            self.yanit_listesi.append(reply_comment)
-
-    def is_reply(self) -> bool:
-        """
-        Check if this comment is a reply to another comment
-        
-        Returns:
-            bool: True if comment is a reply, False otherwise
-        """
-        return self.ust_yorum_id is not None
+        self.dislike_count += 1
 
     def to_dict(self) -> Dict[str, any]:
         """
@@ -93,20 +74,29 @@ class CommentModel:
         """
         return {
             'comment_id': self.comment_id,
-            'forum_id': self.forum_id,
-            'acan_kisi_id': self.acan_kisi_id,
-            'icerik': self.icerik,
-            'acilis_tarihi': self.acilis_tarihi,
-            'foto_urls': self.foto_urls,
-            'begeni_sayisi': self.begeni_sayisi,
-            'begenmeme_sayisi': self.begenmeme_sayisi,
-            'ust_yorum_id': self.ust_yorum_id,
-            'is_active': self.is_active,
-            'yanit_listesi': [reply.to_dict() for reply in self.yanit_listesi]
+            'commented_on_id': self.commented_on_id,
+            'creator_id': self.creator_id,
+            'content': self.content,
+            'created_at': self.created_at,
+            'photo_urls': self.photo_urls,
+            'like_count': self.like_count,
+            'dislike_count': self.dislike_count,
+            'sub_comment_list': [sub_comment for sub_comment in self.sub_comment_list],
+            'latest_sub_comment': self.latest_sub_comment.to_dict() if self.latest_sub_comment else None,
+            'is_active': self.is_active
         }
+    
+    def add_reply(self, sub_comment: 'CommentModel'):
+        """
+        Add a sub-comment to the comment
+        """
+        self.sub_comment_list.append(sub_comment.comment_id)
+        self.latest_sub_comment = sub_comment
+        return
+
 
     def __repr__(self):
-        return f"CommentModel(comment_id={self.comment_id}, icerik={self.icerik[:50]}...)"
+        return f"CommentModel(comment_id={self.comment_id}, content={self.content[:50]}...)"
 
     def __eq__(self, other):
         """

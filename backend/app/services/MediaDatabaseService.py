@@ -119,7 +119,7 @@ class MediaDatabaseService:
                 yuklenme_tarihi=now,
                 ilgili_model=metadata.get('model_type'),
                 ilgili_id=metadata.get('model_id'),
-                aciklama=metadata.get('description'),
+                description=metadata.get('description'),
                 created_at=now,
                 updated_at=now
             )

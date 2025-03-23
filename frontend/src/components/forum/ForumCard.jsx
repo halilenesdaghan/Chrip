@@ -1,12 +1,39 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { FaRegThumbsUp, FaRegThumbsDown, FaRegComment, FaCalendarAlt, FaUniversity } from 'react-icons/fa';
 import { formatDistanceToNow } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { ca, tr } from 'date-fns/locale';
 import Avatar from '../common/Avatar';
+import api from '../../api';
 
 const ForumCard = ({ forum }) => {
+
+  /*
+  const{ token } = useSelector((state) => state.auth.token);
+  const navigate = useNavigate();
+
+  const handleHeaderClick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await api.get(`/forums/${forum.forum_id}`, config);
+      console.log("Fetch forum response:", response.data);
+
+      navigate(`/forums/${forum.forum_id}`);
+    } catch (error) {
+      console.error('Fetch forum error:', error);
+    }
+  };
+
+  */
   // Tarih formatla
   const formatDate = (dateString) => {
     try {
@@ -23,14 +50,14 @@ const ForumCard = ({ forum }) => {
         {/* Forum başlığı */}
         <Link to={`/forums/${forum.forum_id}`} className="block">
           <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 mb-2 truncate">
-            {forum.baslik}
+            {forum.header}
           </h3>
         </Link>
         
         {/* Forum açıklaması (varsa) */}
-        {forum.aciklama && (
+        {forum.description && (
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {forum.aciklama}
+            {forum.description}
           </p>
         )}
         
@@ -39,14 +66,14 @@ const ForumCard = ({ forum }) => {
           {/* Tarih */}
           <div className="flex items-center">
             <FaCalendarAlt className="mr-1" />
-            <span>{formatDate(forum.acilis_tarihi)}</span>
+            <span>{formatDate(forum.created_at)}</span>
           </div>
           
           {/* Üniversite (varsa) */}
-          {forum.universite && (
+          {forum.university && (
             <div className="flex items-center">
               <FaUniversity className="mr-1" />
-              <span className="truncate max-w-[150px]">{forum.universite}</span>
+              <span className="truncate max-w-[150px]">{forum.university}</span>
             </div>
           )}
           
@@ -63,13 +90,13 @@ const ForumCard = ({ forum }) => {
           {/* Forum sahibi */}
           <div className="flex items-center">
             <Avatar 
-              src={forum.acan_kisi?.profil_resmi_url}
-              alt={forum.acan_kisi?.username || 'Kullanıcı'}
+              src={forum.creator_id?.profile_image_url}
+              alt={forum.creator_id?.username || 'Kullanıcı'}
               size="xs"
               className="mr-2"
             />
             <span className="text-sm font-medium text-gray-700">
-              {forum.acan_kisi?.username || 'Anonim'}
+              {forum.creator_id?.username || 'Anonim'}
             </span>
           </div>
           
@@ -78,13 +105,13 @@ const ForumCard = ({ forum }) => {
             {/* Beğeni sayısı */}
             <div className="flex items-center text-gray-500">
               <FaRegThumbsUp className="mr-1" />
-              <span>{forum.begeni_sayisi || 0}</span>
+              <span>{forum.like_count || 0}</span>
             </div>
             
             {/* Beğenmeme sayısı */}
             <div className="flex items-center text-gray-500">
               <FaRegThumbsDown className="mr-1" />
-              <span>{forum.begenmeme_sayisi || 0}</span>
+              <span>{forum.dislike_count || 0}</span>
             </div>
             
             {/* Yorum sayısı */}
@@ -102,20 +129,15 @@ const ForumCard = ({ forum }) => {
 ForumCard.propTypes = {
   forum: PropTypes.shape({
     forum_id: PropTypes.string.isRequired,
-    baslik: PropTypes.string.isRequired,
-    aciklama: PropTypes.string,
-    acilis_tarihi: PropTypes.string,
-    acan_kisi_id: PropTypes.string,
-    acan_kisi: PropTypes.shape({
-      username: PropTypes.string,
-      profil_resmi_url: PropTypes.string
-    }),
-    foto_urls: PropTypes.arrayOf(PropTypes.string),
-    yorum_ids: PropTypes.arrayOf(PropTypes.string),
-    begeni_sayisi: PropTypes.number,
-    begenmeme_sayisi: PropTypes.number,
-    universite: PropTypes.string,
-    kategori: PropTypes.string
+    header: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    created_at: PropTypes.string,
+    creator_id: PropTypes.string,
+    photo_urls: PropTypes.arrayOf(PropTypes.string),
+    like_count: PropTypes.string,
+    dislike_count: PropTypes.string,
+    university: PropTypes.string,
+    category: PropTypes.string
   }).isRequired
 };
 

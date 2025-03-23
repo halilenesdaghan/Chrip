@@ -59,7 +59,7 @@ class GroupService:
             group = GroupModel(
                 group_id=f"grp_{uuid.uuid4()}",
                 grup_adi=group_data['grup_adi'],
-                aciklama=group_data.get('aciklama', ''),
+                description=group_data.get('description', ''),
                 olusturulma_tarihi=datetime.now(),
                 olusturan_id=user_id,
                 logo_url=group_data.get('logo_url'),
@@ -170,7 +170,7 @@ class GroupService:
             # Güncellenebilir alanlar
             update_fields = [
                 'grup_adi', 
-                'aciklama', 
+                'description', 
                 'logo_url', 
                 'kapak_resmi_url', 
                 'gizlilik', 
@@ -586,7 +586,7 @@ class GroupService:
             page (int, optional): Sayfa numarası
             per_page (int, optional): Sayfa başına grup sayısı
             search (str, optional): Arama metni
-            kategoriler (list, optional): Kategori filtresi
+            kategoriler (list, optional): category, filtresi
             
         Returns:
             dict: Gruplar ve meta bilgiler
@@ -601,10 +601,10 @@ class GroupService:
             if search:
                 search_lower = search.lower()
                 if (search_lower not in group.grup_adi.lower() and 
-                    (not group.aciklama or search_lower not in group.aciklama.lower())):
+                    (not group.description or search_lower not in group.description.lower())):
                     return False
             
-            # Kategori filtresi
+            # category filtresi
             if kategoriler:
                 if not any(kat in group.kategoriler for kat in kategoriler):
                     return False

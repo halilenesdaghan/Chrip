@@ -1,6 +1,5 @@
 from flask import Blueprint, request, g
 from marshmallow import Schema, fields, validate
-from app.services.CommentTableDatabaseService import CommentDatabaseService
 from app.utils.responses import (
     success_response, 
     error_response, 
@@ -16,29 +15,40 @@ from app.middleware.validation import (
     is_uuid, 
     is_positive_integer
 )
+from app.services.comment_service import CommentService
+import traceback
+"""
+API endpoints for comment operations.
+
+Endpoints:
+- /comments/ [POST]: Create a new comment
+- /comments/<comment_id> [GET]: Get a specific comment
+- /comments/<comment_id> [PUT]: Update an existing comment
+- /comments/<comment_id> [DELETE]: Delete a comment
+- /comments/<comment_id>/replies [GET]: Get replies for a specific comment
+- /comments/<comment_id>/react [POST]: Add a reaction to a comment
+"""
 
 # Blueprint and Database Service
 comment_bp = Blueprint('comment', __name__)
-comment_db_service = CommentDatabaseService()
 
 # Schemas
 class CommentCreateSchema(Schema):
     """Comment creation schema"""
-    forum_id = fields.Str(required=True, error_messages={'required': 'Forum ID zorunludur'})
-    icerik = fields.Str(required=True, error_messages={'required': 'Yorum içeriği zorunludur'})
-    foto_urls = fields.List(fields.Url())
-    ust_yorum_id = fields.Str()  # Optional parent comment ID
+    commented_on_id = fields.Str(required=True, error_messages={'required': 'Commented On ID zorunludur'})
+    content = fields.Str(required=True, error_messages={'required': 'Yorum içeriği zorunludur'})
+    photo_urls = fields.List(fields.Url())
 
 class CommentUpdateSchema(Schema):
     """Comment update schema"""
-    icerik = fields.Str()
-    foto_urls = fields.List(fields.Url())
+    content = fields.Str()
+    photo_urls = fields.List(fields.Url())
 
 class CommentReactionSchema(Schema):
     """Comment reaction schema"""
     reaction_type = fields.Str(
         required=True, 
-        validate=validate.OneOf(['begeni', 'begenmeme']), 
+        validate=validate.OneOf(['like', 'dislike']), 
         error_messages={'required': 'Reaksiyon türü gereklidir'}
     )
 
@@ -58,14 +68,14 @@ def create_comment():
         data = request.validated_data
         
         # Create comment
-        comment = comment_db_service.create_comment(
-            user_id=user_id,
-            forum_id=data['forum_id'],
-            icerik=data['icerik'],
-            foto_urls=data.get('foto_urls'),
-            ust_yorum_id=data.get('ust_yorum_id')
+        comment = CommentService.create_comment(
+            commented_on_id=data['commented_on_id'],
+            creator_id=user_id,
+            content=data['content'],
+            photo_urls=data.get('photo_urls', [])
         )
         
+        print (comment.to_dict())
         return created_response(comment.to_dict(), "Yorum başarıyla oluşturuldu")
     
     except ValueError as e:
@@ -74,13 +84,13 @@ def create_comment():
         return error_response("Yorum oluşturulamadı", 500)
 
 @comment_bp.route('/<comment_id>', methods=['GET'])
-@validate_schema({'comment_id': fields.Str(validate=is_uuid)})
+@authenticate
 def get_comment(comment_id):
     """
     Retrieve a specific comment by ID
     """
     try:
-        comment = comment_db_service.get_comment_by_id(comment_id)
+        comment = CommentService.get_comment(comment_id)
         
         if not comment:
             return error_response("Yorum bulunamadı", 404)
@@ -108,9 +118,9 @@ def update_comment(comment_id):
         update_data = {k: v for k, v in update_data.items() if v is not None}
         
         # Update comment
-        updated_comment = comment_db_service.update_comment(
+        updated_comment = CommentService.update_comment(
             comment_id=comment_id,
-            user_id=user_id,
+            creator_id=user_id,
             update_data=update_data
         )
         
@@ -132,7 +142,7 @@ def delete_comment(comment_id):
         user_id = g.user.user_id
         
         # Delete comment
-        comment_db_service.delete_comment(
+        CommentService.delete_comment(
             comment_id=comment_id,
             user_id=user_id
         )
@@ -145,7 +155,6 @@ def delete_comment(comment_id):
         return error_response("Yorum silinemedi", 500)
 
 @comment_bp.route('/<comment_id>/replies', methods=['GET'])
-@validate_schema({'comment_id': fields.Str(validate=is_uuid)})
 @validate_query_params({
     'page': is_positive_integer,
     'per_page': is_positive_integer
@@ -155,26 +164,19 @@ def get_comment_replies(comment_id):
     Retrieve replies for a specific comment
     """
     try:
-        # Extract query parameters
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 20))
-        
         # Get comment replies
-        result = comment_db_service.get_comment_replies(
-            comment_id=comment_id,
-            page=page,
-            per_page=per_page
+        result = CommentService.get_comment_replies(
+            comment_id=comment_id
         )
         
-        return list_response(
-            result['replies'], 
-            result['meta']['total'], 
-            result['meta']['page'],
-            result['meta']['per_page'],
-            "Yorum yanıtları başarıyla getirildi"
+        return success_response(
+            result, 
+            "Yorum yanıtları başarıyla getirildi",
+            200
         )
     
     except Exception as e:
+        print (traceback.format_exc(), flush=True)
         return error_response(str(e), 500)
 
 @comment_bp.route('/<comment_id>/react', methods=['POST'])
@@ -192,10 +194,10 @@ def react_to_comment(comment_id):
         data = request.validated_data
         
         # Add reaction
-        result = comment_db_service.react_to_comment(
+        result = CommentService.react_to_comment(
             comment_id=comment_id,
             user_id=user_id,
-            reaction_type=data['reaction_type']
+            reaction=data['reaction_type']
         )
         
         return success_response(result, "Reaksiyon başarıyla eklendi")
@@ -203,4 +205,5 @@ def react_to_comment(comment_id):
     except ValueError as e:
         return error_response(str(e), 400)
     except Exception as e:
+        print (traceback.format_exc(), flush=True)
         return error_response("Reaksiyon eklenemedi", 500)

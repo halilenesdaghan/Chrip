@@ -26,6 +26,7 @@ const ForumDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { token } = useSelector((state) => state.auth);
   
   const [forum, setForum] = useState(null);
   const [comments, setComments] = useState([]);
@@ -42,7 +43,14 @@ const ForumDetail = () => {
     const fetchForum = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/forums/${id}`);
+        
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const response = await api.get(`/forums/${id}`, config);
         setForum(response.data.data);
       } catch (err) {
         console.error('Error fetching forum:', err);
@@ -156,14 +164,14 @@ const ForumDetail = () => {
   }
   
   // Kullanıcının forum sahibi olup olmadığını kontrol et
-  const isOwner = isAuthenticated && user && forum.acan_kisi_id === user.user_id;
+  const isOwner = isAuthenticated && user && forum.creator_id === user.user_id;
   
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white p-6 rounded-lg shadow-sm">
         {/* Başlık ve eylemler */}
         <div className="flex justify-between items-start mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">{forum.baslik}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{forum.header}</h1>
           
           {isOwner && (
             <div className="flex space-x-2">
@@ -216,7 +224,7 @@ const ForumDetail = () => {
                 <img 
                   key={index}
                   src={url}
-                  alt={`${forum.baslik} - Görsel ${index + 1}`}
+                  alt={`${forum.header} - Görsel ${index + 1}`}
                   className="w-full h-auto rounded-lg"
                 />
               ))}
@@ -226,20 +234,20 @@ const ForumDetail = () => {
         
         {/* Forum içeriği */}
         <div className="prose max-w-none mb-6">
-          <p className="text-gray-700 whitespace-pre-line">{forum.aciklama}</p>
+          <p className="text-gray-700 whitespace-pre-line">{forum.description}</p>
         </div>
         
         {/* Alt bilgiler: Forum sahibi */}
         <div className="flex items-center py-4 border-t border-b border-gray-200">
           <Avatar 
-            src={forum.acan_kisi?.profil_resmi_url}
-            alt={forum.acan_kisi?.username || 'Kullanıcı'}
+            src={forum.creator_id?.profil_resmi_url}
+            alt={forum.creator_id?.username || 'Kullanıcı'}
             size="md"
             className="mr-3"
           />
           <div>
             <div className="font-medium text-gray-900">
-              {forum.acan_kisi?.username || 'Anonim'}
+              {forum.creator_id?.username || 'Anonim'}
             </div>
             <div className="text-sm text-gray-500">Forum sahibi</div>
           </div>

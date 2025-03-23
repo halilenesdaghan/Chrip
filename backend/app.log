@@ -295,3 +295,926 @@ Media veritabanı servisi başlatıldı
 Error handlers registered successfully
 Uygulama DEBUG modunda başlatıldı
 Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Kullanıcı kaydı sırasında hata: UserDatabaseService.create_user() got an unexpected keyword argument 'cinsiyet'
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Kullanıcı kaydı sırasında hata: UserDatabaseService.create_user() got an unexpected keyword argument 'cinsiyet'
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Kullanıcı kaydı sırasında hata: Username already exists
+Kullanıcı kaydı sırasında hata: 'UserModel' object is not subscriptable
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Kullanıcı kaydı sırasında hata: 'UserModel' object is not subscriptable
+Error: 'UserModel' object is not subscriptable
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 55, in register
+    token = generate_token(user['user_id'])
+                           ~~~~^^^^^^^^^^^
+TypeError: 'UserModel' object is not subscriptable
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Kullanıcı kaydı sırasında hata: Email already exists
+Error: Email already exists
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 46, in register
+    user = self.user_db_service.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 71, in create_user
+    raise ValueError("Email already exists")
+ValueError: Email already exists
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Kullanıcı kaydı sırasında hata: list index out of range
+Error: list index out of range
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 46, in register
+    user = self.user_db_service.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 72, in create_user
+    existing_email = self._get_user_by_email(email)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 150, in _get_user_by_email
+    user_data = response.get('Items', [])[0]
+                ~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: UserDatabaseService.update_user() takes 2 positional arguments but 3 were given
+Error: UserDatabaseService.update_user() takes 2 positional arguments but 3 were given
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 86, in login
+    self.user_db_service.update_user(
+TypeError: UserDatabaseService.update_user() takes 2 positional arguments but 3 were given
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+Error: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 296, in update_user
+    self.table.update_item(
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\factory.py", line 580, in do_action
+    response = action(self, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\action.py", line 88, in __call__
+    response = getattr(parent.meta.client, operation_name)(*args, **params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 530, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 960, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 89, in login
+    self.user_db_service.update_user(
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 302, in update_user
+    raise ValueError(f"Error updating user: {e}")
+ValueError: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+Error: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 296, in update_user
+    self.table.update_item(
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\factory.py", line 580, in do_action
+    response = action(self, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\action.py", line 88, in __call__
+    response = getattr(parent.meta.client, operation_name)(*args, **params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 530, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 960, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 89, in login
+    self.user_db_service.update_user(
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 302, in update_user
+    raise ValueError(f"Error updating user: {e}")
+ValueError: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: Parameter validation failed:
+Missing required parameter in input: "Item"
+Unknown parameter in input: "Key", must be one of: TableName, Item, Expected, ReturnValues, ReturnConsumedCapacity, ReturnItemCollectionMetrics, ConditionalOperator, ConditionExpression, ExpressionAttributeNames, ExpressionAttributeValues
+Unknown parameter in input: "UpdateExpression", must be one of: TableName, Item, Expected, ReturnValues, ReturnConsumedCapacity, ReturnItemCollectionMetrics, ConditionalOperator, ConditionExpression, ExpressionAttributeNames, ExpressionAttributeValues
+Error: Parameter validation failed:
+Missing required parameter in input: "Item"
+Unknown parameter in input: "Key", must be one of: TableName, Item, Expected, ReturnValues, ReturnConsumedCapacity, ReturnItemCollectionMetrics, ConditionalOperator, ConditionExpression, ExpressionAttributeNames, ExpressionAttributeValues
+Unknown parameter in input: "UpdateExpression", must be one of: TableName, Item, Expected, ReturnValues, ReturnConsumedCapacity, ReturnItemCollectionMetrics, ConditionalOperator, ConditionExpression, ExpressionAttributeNames, ExpressionAttributeValues
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 89, in login
+    self.user_db_service.update_user(
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 296, in update_user
+    self.table.put_item(
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\factory.py", line 580, in do_action
+    response = action(self, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\action.py", line 88, in __call__
+    response = getattr(parent.meta.client, operation_name)(*args, **params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 530, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 919, in _make_api_call
+    request_dict = self._convert_to_request_dict(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 990, in _convert_to_request_dict
+    request_dict = self._serializer.serialize_to_request(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\validate.py", line 381, in serialize_to_request
+    raise ParamValidationError(report=report.generate_report())
+botocore.exceptions.ParamValidationError: Parameter validation failed:
+Missing required parameter in input: "Item"
+Unknown parameter in input: "Key", must be one of: TableName, Item, Expected, ReturnValues, ReturnConsumedCapacity, ReturnItemCollectionMetrics, ConditionalOperator, ConditionExpression, ExpressionAttributeNames, ExpressionAttributeValues
+Unknown parameter in input: "UpdateExpression", must be one of: TableName, Item, Expected, ReturnValues, ReturnConsumedCapacity, ReturnItemCollectionMetrics, ConditionalOperator, ConditionExpression, ExpressionAttributeNames, ExpressionAttributeValues
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+Error: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 296, in update_user
+    self.table.update_item(
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\factory.py", line 580, in do_action
+    response = action(self, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\boto3\resources\action.py", line 88, in __call__
+    response = getattr(parent.meta.client, operation_name)(*args, **params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 530, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\botocore\client.py", line 960, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 89, in login
+    self.user_db_service.update_user(
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 302, in update_user
+    raise ValueError(f"Error updating user: {e}")
+ValueError: Error updating user: An error occurred (ValidationException) when calling the UpdateItem operation: The provided key element does not match the schema
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+Error: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 89, in login
+    self.user_db_service.update_user(
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 310, in update_user
+    updated_user = self._get_user_by_user_id(user_id)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 131, in _get_user_by_user_id
+    return UserModel(**user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+Error: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 72, in login
+    user = self.user_db_service._get_user_by_email(email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 155, in _get_user_by_email
+    return UserModel(**user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Giriş sırasında hata: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+Error: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\app\services\auth_service.py", line 72, in login
+    user = self.user_db_service._get_user_by_email(email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\services\UserTableDatabaseService.py", line 155, in _get_user_by_email
+    return UserModel(**user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: UserModel.__init__() got an unexpected keyword argument 'updated_at'
+
+Password changed for user: usr_7b8dde4d-e687-4107-9a1b-932203d0fffe
+Password reset token generated for user: usr_7b8dde4d-e687-4107-9a1b-932203d0fffe
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Authorization header gerekli
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Authorization header gerekli
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Password changed for user: usr_9f7be783-fb23-44c9-8ae2-8d442c15e887
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatıldı
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Password changed for user: usr_9c54b58f-c5ea-4088-8627-6840e27fc66c
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Authorization header gerekli
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Unhandled Exception: 'dict' object has no attribute 'validate'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\validation.py", line 36, in wrapper
+    errors = schema.validate(data)
+             ^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'validate'
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Unhandled Exception: 'dict' object has no attribute 'validate'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\auth.py", line 116, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\validation.py", line 36, in wrapper
+    errors = schema.validate(data)
+             ^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'validate'
+Unhandled Exception: 'dict' object has no attribute 'validate'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\auth.py", line 116, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\validation.py", line 36, in wrapper
+    errors = schema.validate(data)
+             ^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'validate'
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Unhandled Exception: 'dict' object has no attribute 'validate'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\validation.py", line 36, in wrapper
+    errors = schema.validate(data)
+             ^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'validate'
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Token süresi dolmuş
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token
+Auth Error: Geçersiz token

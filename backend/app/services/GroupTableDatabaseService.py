@@ -43,7 +43,7 @@ class GroupDatabaseService:
         self, 
         user_id: str, 
         grup_adi: str, 
-        aciklama: Optional[str] = None,
+        description: Optional[str] = None,
         logo_url: Optional[str] = None,
         kapak_resmi_url: Optional[str] = None,
         gizlilik: str = 'acik',
@@ -55,7 +55,7 @@ class GroupDatabaseService:
         Args:
             user_id (str): ID of the user creating the group
             grup_adi (str): Group name
-            aciklama (str, optional): Group description
+            description (str, optional): Group description
             logo_url (str, optional): Group logo URL
             kapak_resmi_url (str, optional): Group cover image URL
             gizlilik (str, optional): Group privacy setting
@@ -74,7 +74,7 @@ class GroupDatabaseService:
         group_data = {
             'group_id': group_id,
             'grup_adi': grup_adi,
-            'aciklama': aciklama or '',
+            'description': description or '',
             'olusturan_id': user_id,
             'olusturulma_tarihi': datetime.now().isoformat(),
             'logo_url': logo_url,
@@ -155,9 +155,9 @@ class GroupDatabaseService:
             if kategoriler:
                 # Create an OR condition for multiple categories
                 category_conditions = []
-                for i, kategori in enumerate(kategoriler):
-                    key = f':kategori{i}'
-                    scan_params['ExpressionAttributeValues'][key] = kategori
+                for i, category in enumerate(kategoriler):
+                    key = f':category{i}'
+                    scan_params['ExpressionAttributeValues'][key] = category
                     category_conditions.append(f'contains(kategoriler, {key})')
                 
                 scan_params['FilterExpression'] += ' AND (' + ' OR '.join(category_conditions) + ')'
@@ -242,7 +242,7 @@ class GroupDatabaseService:
             
             # Updatable fields
             updatable_fields = [
-                'grup_adi', 'aciklama', 'logo_url', 
+                'grup_adi', 'description', 'logo_url', 
                 'kapak_resmi_url', 'gizlilik', 'kategoriler'
             ]
             for field in updatable_fields:

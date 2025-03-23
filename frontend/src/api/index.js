@@ -3,7 +3,7 @@ import setupMockAxiosInterceptor from './mockInterceptor';
 
 // Ortam değişkenlerini kontrol et
 const IS_MOCK_API = true; // Bu değişkeni false yaparak gerçek API'ye bağlanabilirsiniz
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000/api/v1';
 
 // Axios instance oluştur
 const api = axios.create({

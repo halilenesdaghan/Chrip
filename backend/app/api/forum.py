@@ -14,6 +14,7 @@ API endpoints for forum operations.
 Endpoints:
 - /forums/ [GET]: Retrieve forums
 - /forums/<forum_id> [GET]: Retrieve a specific forum
+- /forums/<forum_id>/creator_info [GET]: Retrieve creator information for a specific forum
 - /forums/ [POST]: Create a new forum
 - /forums/<forum_id> [PUT]: Update an existing forum
 - /forums/<forum_id> [DELETE]: Hard delete a forum

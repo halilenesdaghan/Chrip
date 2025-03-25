@@ -4,6 +4,7 @@ import { FaUpload, FaImage, FaSpinner, FaCheck, FaExclamationTriangle } from 're
 import Button from '../common/Button';
 import mediaService from '../../api/media';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 const MediaUploader = ({ 
   onUploadComplete, 
@@ -14,6 +15,7 @@ const MediaUploader = ({
   multiple = false,
   className = '' 
 }) => {
+  const token = useSelector(state => state.auth.token);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -111,7 +113,7 @@ const MediaUploader = ({
           setUploadProgress(prev => Math.min(prev + 15, 80));
         }, 200);
         
-        response = await mediaService.uploadFile(files[0], metadata);
+        response = await mediaService.uploadFile(files[0], metadata, token);
         
         clearInterval(progressInterval);
         setUploadProgress(100);

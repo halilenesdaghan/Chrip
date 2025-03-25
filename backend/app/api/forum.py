@@ -4,6 +4,7 @@ from app.utils.responses import success_response, error_response, list_response,
 from app.middleware.auth import authenticate
 from app.middleware.validation import validate_schema, is_positive_integer, is_uuid
 from app.services.forum_service import ForumService
+from app.services.user_service import UserService
 from app.models.UserModel import UserRoles
 import traceback
 
@@ -26,6 +27,7 @@ class ForumCreateSchema(Schema):
     header = fields.Str(required=True, validate=validate.Length(min=3, max=100))
     description = fields.Str()
     category = fields.Str()
+    photo_urls = fields.List(fields.Url())
 
 class ForumUpdateSchema(Schema):
     header = fields.Str(validate=validate.Length(min=3, max=100))
@@ -78,6 +80,7 @@ def get_forums():
         )
     
     except Exception as e:
+        print (traceback.format_exc(), flush=True)
         return error_response(str(e), 500)
 
 @forum_bp.route('/<forum_id>', methods=['GET'])
@@ -96,6 +99,26 @@ def get_forum(forum_id):
     
     except Exception as e:
         return error_response(str(e), 500)
+
+@forum_bp.route('/<forum_id>/creator_info', methods=['GET'])
+@authenticate
+def get_forum_creator_info(forum_id):
+    """
+    Retrieve creator information for a specific forum
+    """
+    try:
+        # Get creator information
+        creator_info = ForumService.get_creator_info(forum_id)
+
+        if not creator_info:
+            return error_response("Kullanıcı bilgileri bulunamadı", 404)
+        
+        return success_response(creator_info, "Kullanıcı bilgileri başarıyla getirildi")
+    
+    except Exception as e:
+        print (traceback.format_exc(), flush=True)
+        return error_response(str(e), 500)
+    
 
 @forum_bp.route('/', methods=['POST'])
 @authenticate
@@ -117,13 +140,17 @@ def create_forum():
             header=data['header'],
             description=data.get('description', ''),
             category=data.get('category'),
+            photo_urls=data.get('photo_urls', [])
         )
         
         return created_response(forum.to_dict(), "Forum başarıyla oluşturuldu")
     
     except ValueError as e:
+        # prints the traceback of the error in red using ansi color codes
+        print ("\033[91m", traceback.format_exc(), "\033[0m", flush=True)
         return error_response(str(e), 400)
     except Exception as e:
+        print ("\033[91m", traceback.format_exc(), "\033[0m", flush=True)
         return error_response("Forum oluşturulamadı", 500)
 
 @forum_bp.route('/<forum_id>', methods=['PUT'])

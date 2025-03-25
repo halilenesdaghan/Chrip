@@ -16,7 +16,7 @@ class CommentModel:
         like_count (int): Number of likes
         dislike_count (int): Number of dislikes
         sub_comment_list (List[CommentModel]): List of sub-comments
-        latest_sub_comment_id (str): ID of the latest sub-comment
+        latest_sub_comment (str): ID of the latest sub-comment
         is_active (bool): Comment active status
     """
     def __init__(

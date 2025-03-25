@@ -2,7 +2,7 @@ import api from './index';
 
 const mediaService = {
   // Tekil dosya yükleme
-  uploadFile: async (file, metadata = {}) => {
+  uploadFile: async (file, metadata = {}, user_token) => {
     const formData = new FormData();
     formData.append('file', file);
     
@@ -13,7 +13,8 @@ const mediaService = {
     
     const response = await api.post('/media/upload', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${user_token}`
       }
     });
     return response.data;

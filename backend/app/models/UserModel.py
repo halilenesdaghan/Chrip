@@ -78,6 +78,20 @@ class UserModel:
             'forums': self.forums,
             'polls': self.polls
         }
+    
+    def safe_dict(self):
+        """
+        Convert user model to dictionary, excluding sensitive information.
+        
+        Returns:
+            dict: User data dictionary
+        """
+        return {
+            'username': self.username,
+            'is_active': self.is_active,
+            'gender': self.gender,
+            'profile_image_url': self.profile_image_url
+        }
 
     def add_group(self, group_id: str):
         """Add a group to user's group list"""

@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from app.models.CommentModel import CommentModel
 from app.models.ForumModel import ForumModel
 from app.models.UserModel import UserModel
+import traceback
 
 DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
 DEFAULT_COMMENTS_TABLE_NAME = os.getenv('COMMENTS_TABLE_NAME', 'Comments')
@@ -230,10 +231,18 @@ class CommentDatabaseService:
                 ExpressionAttributeValues={':commented_on_id': commented_on_id}
             )
             
+            # prints the response in orange color using ansi escape code
+            print(f"\033[93m{response}\033[00m", flush=True)
             items = response.get('Items', [])
             return [CommentModel(**item) for item in items]
         
         except ClientError:
+            # prints the traceback in red color using ansi escape code
+            print(f"\033[91m{traceback.format_exc()}\033[00m", flush=True)
+            return []
+        except Exception as e:
+            # prints the error message in red color using ansi escape code
+            print(f"\033[91m{str(e)}\033[00m", flush=True)
             return []
         
 

@@ -1218,3 +1218,175 @@ Auth Error: Geçersiz token
 Auth Error: Geçersiz token
 Auth Error: Geçersiz token
 Auth Error: Geçersiz token
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Unhandled Exception: 'CommentedOnIdSchema' object has no attribute 'items'
+Traceback (most recent call last):
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1823, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\venv\Lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\auth.py", line 116, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Chrip\backend\app\middleware\validation.py", line 97, in wrapper
+    for param_name, validator_func in validators.items():
+                                      ^^^^^^^^^^^^^^^^
+AttributeError: 'CommentedOnIdSchema' object has no attribute 'items'
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Logging configured
+User veritabanı servisi başlatılamadı: This class is a singleton!
+Forum veritabanı servisi başlatıldı
+Comment veritabanı servisi başlatıldı
+Poll veritabanı servisi başlatıldı
+Group veritabanı servisi başlatıldı
+Media veritabanı servisi başlatıldı
+Error handlers registered successfully
+Uygulama DEBUG modunda başlatıldı
+Sunucu 0.0.0.0:5000 üzerinde başlatılıyor (Debug: True)
+Auth Error: Token süresi dolmuş
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Logging configured
+Error handlers registered successfully
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Authorization header gerekli
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Authorization header gerekli
+Logging configured
+Error handlers registered successfully
+Auth Error: Authorization header gerekli
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Auth Error: Authorization header gerekli
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Logging configured
+Error handlers registered successfully
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token
+Auth Error: Ge�ersiz token

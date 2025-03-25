@@ -184,6 +184,8 @@ class ForumDatabaseService:
             # Convert to ForumModel objects
             forums = [ForumModel(**item) for item in paginated_items]
             
+            # prints the total count of forums in orange using ansi color codes
+            print(f"\033[93mTotal Forums: {total_count}\033[0m")
             return {
                 'forums': [forum.to_dict() for forum in forums],
                 'meta': {

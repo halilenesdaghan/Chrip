@@ -8,12 +8,18 @@ import api from '../api';
 const CreateForum = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
 
   const handleSubmit = async (forumData) => {
     try {
       setIsLoading(true);
-      const response = await api.post('/forums', forumData);
+      const response = await api.post('/forums/', forumData, config);
       
       // Başarılı yanıt
       if (response.data.status === 'success') {
@@ -44,7 +50,6 @@ const CreateForum = () => {
         onSubmit={handleSubmit}
         isLoading={isLoading}
         initialValues={{
-          universite: user?.universite || '',
         }}
       />
     </div>

@@ -29,8 +29,10 @@ const ForumDetail = () => {
   const { token } = useSelector((state) => state.auth);
   
   const [forum, setForum] = useState(null);
+  const [creatorInfo, setCreatorInfo] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [creatorLoading, setCreatorLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentsLoading, setCommentsLoading] = useState(true);
   const [userReaction, setUserReaction] = useState(null); // 'begeni', 'begenmeme', or null
@@ -61,14 +63,47 @@ const ForumDetail = () => {
     };
     
     fetchForum();
-  }, [id]);
+  }, [id, token]);
+  
+  // Forum sahibi bilgilerini getir
+  useEffect(() => {
+    const fetchCreatorInfo = async () => {
+      if (!forum) return;
+      
+      try {
+        setCreatorLoading(true);
+        
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const response = await api.get(`/forums/${id}/creator_info`, config);
+        setCreatorInfo(response.data.data);
+      } catch (err) {
+        console.error('Error fetching creator info:', err);
+        // Creator info yüklenemediğinde sessizce devam et
+      } finally {
+        setCreatorLoading(false);
+      }
+    };
+    
+    fetchCreatorInfo();
+  }, [id, forum, token]);
   
   // Yorumları getir
   useEffect(() => {
     const fetchComments = async () => {
       try {
         setCommentsLoading(true);
-        const response = await api.get(`/forums/${id}/comments`);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const response = await api.get(`/comments/commented_on_id=${id}`, config);
         setComments(response.data.data || []);
       } catch (err) {
         console.error('Error fetching comments:', err);
@@ -81,7 +116,7 @@ const ForumDetail = () => {
     if (forum) {
       fetchComments();
     }
-  }, [id, forum]);
+  }, [id, forum, token]);
   
   // Tarih formatı
   const formatDate = (dateString) => {
@@ -197,30 +232,30 @@ const ForumDetail = () => {
           {/* Tarih */}
           <div className="flex items-center">
             <FaCalendarAlt className="mr-1" />
-            <span>{formatDate(forum.acilis_tarihi)}</span>
+            <span>{formatDate(forum.created_at)}</span>
           </div>
           
           {/* Üniversite (varsa) */}
-          {forum.universite && (
+          {forum.university && (
             <div className="flex items-center">
               <FaUniversity className="mr-1" />
-              <span>{forum.universite}</span>
+              <span>{forum.university}</span>
             </div>
           )}
           
           {/* Kategori (varsa) */}
-          {forum.kategori && (
+          {forum.category && (
             <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
-              {forum.kategori}
+              {forum.category}
             </span>
           )}
         </div>
         
         {/* Forum görselleri */}
-        {forum.foto_urls && forum.foto_urls.length > 0 && (
+        {forum.photo_urls && forum.photo_urls.length > 0 && (
           <div className="mb-6">
             <div className="grid grid-cols-1 gap-4">
-              {forum.foto_urls.map((url, index) => (
+              {forum.photo_urls.map((url, index) => (
                 <img 
                   key={index}
                   src={url}
@@ -239,18 +274,30 @@ const ForumDetail = () => {
         
         {/* Alt bilgiler: Forum sahibi */}
         <div className="flex items-center py-4 border-t border-b border-gray-200">
-          <Avatar 
-            src={forum.creator_id?.profil_resmi_url}
-            alt={forum.creator_id?.username || 'Kullanıcı'}
-            size="md"
-            className="mr-3"
-          />
-          <div>
-            <div className="font-medium text-gray-900">
-              {forum.creator_id?.username || 'Anonim'}
+          {creatorLoading ? (
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse mr-3"></div>
+              <div>
+                <div className="h-4 w-24 bg-gray-200 animate-pulse mb-2 rounded"></div>
+                <div className="h-3 w-16 bg-gray-200 animate-pulse rounded"></div>
+              </div>
             </div>
-            <div className="text-sm text-gray-500">Forum sahibi</div>
-          </div>
+          ) : (
+            <>
+              <Avatar 
+                src={creatorInfo?.profile_image_url}
+                alt={creatorInfo?.username || 'Kullanıcı'}
+                size="md"
+                className="mr-3"
+              />
+              <div> 
+                <div className="font-medium text-gray-900">
+                  {creatorInfo?.username || 'Anonim'}
+                </div>
+                <div className="text-sm text-gray-500">Forum sahibi</div>
+              </div>
+            </>
+          )}
         </div>
         
         {/* Reaksiyonlar ve yorum sayısı */}

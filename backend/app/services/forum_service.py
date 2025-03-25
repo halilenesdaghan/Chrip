@@ -22,7 +22,8 @@ class ForumService:
                         header: str,
                         creator_id: str,
                         description: str = "",
-                        category: str = ""):
+                        category: str = "",
+                        photo_urls: list = None):
         try:
             forum_db_service = ForumDatabaseService.get_instance()
             user_db_service = UserDatabaseService.get_instance()
@@ -35,7 +36,8 @@ class ForumService:
                 header=header,
                 description=description,
                 university=user.university,
-                category=category
+                category=category,
+                photo_urls=photo_urls
             )
 
             if new_forum:
@@ -95,3 +97,17 @@ class ForumService:
         except Exception as e:
             traceback.print_exc()
             raise Exception("Forum silinirken bir hata oluştu")
+        
+    @staticmethod
+    def get_creator_info(forum_id: str):
+        try:
+            forum_db_service = ForumDatabaseService.get_instance()
+            user_db_service = UserDatabaseService.get_instance()
+            forum = forum_db_service.get_forum_by_id(forum_id)
+            user = user_db_service._get_user_by_user_id(forum.creator_id)
+            if not user:
+                raise Exception("Kullanıcı bulunamadı")
+            return user.safe_dict()
+        except Exception as e:
+            traceback.print_exc()
+            raise Exception("Forum yaratıcısı getirilirken bir hata oluştu")

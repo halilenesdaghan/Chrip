@@ -159,11 +159,11 @@ CommentList.propTypes = {
   comments: PropTypes.arrayOf(
     PropTypes.shape({
       comment_id: PropTypes.string.isRequired,
-      forum_id: PropTypes.string.isRequired,
-      acan_kisi_id: PropTypes.string,
-      icerik: PropTypes.string.isRequired,
-      acilis_tarihi: PropTypes.string,
-      ust_yorum_id: PropTypes.string
+      commented_on_id: PropTypes.string.isRequired,
+      creator_id: PropTypes.string,
+      content: PropTypes.string.isRequired,
+      created_at: PropTypes.string,
+      latest_sub_comment: PropTypes.string
     })
   ).isRequired,
   showReplies: PropTypes.bool

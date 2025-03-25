@@ -77,6 +77,8 @@ class CommentService:
         try:
             comment_db_service = CommentDatabaseService.get_instance()
             comments = comment_db_service.get_comments_by_commented_on_id(commented_on_id)
+            # prints the retrived commetns in orange color
+            print ('\033[33m' + str(comments) + '\033[0m', flush=True)
             return comments
         except Exception as e:
             print (traceback.format_exc(), flush=True)
@@ -171,7 +173,7 @@ class CommentService:
         """
         try:
             comment_db_service = CommentDatabaseService.get_instance()
-            comment_db_service.react_to_comment(comment_id, user_id, reaction)
+            return comment_db_service.react_to_comment(comment_id, user_id, reaction)
         except Exception as e:
             print (traceback.format_exc(), flush=True)
             logging.error(f"Comment reaction failed: {e}")

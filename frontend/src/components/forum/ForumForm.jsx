@@ -26,7 +26,7 @@ const ForumForm = ({ initialValues = {}, onSubmit, isLoading = false, isEdit = f
       header: initialValues.header || '',
       description: initialValues.description || '',
       category: initialValues.category || '',
-      foto_urls: initialValues.foto_urls || [],
+      photo_urls: initialValues.photo_urls || [],
     },
     validationSchema,
     onSubmit: (values) => {
@@ -108,13 +108,13 @@ const ForumForm = ({ initialValues = {}, onSubmit, isLoading = false, isEdit = f
           />
 
           {/* Medya Görüntüleme */}
-          {formik.values.foto_urls.length > 0 && (
+          {formik.values.photo_urls.length > 0 && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Yüklenen Görseller
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {formik.values.foto_urls.map((url, index) => (
+                {formik.values.photo_urls.map((url, index) => (
                   <div key={index} className="relative">
                     <img 
                       src={url} 

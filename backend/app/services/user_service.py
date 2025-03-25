@@ -21,11 +21,26 @@ class UserService:
     
     Handles user profile management and related operations.
     """
+
+    __instance = None
+
+    @staticmethod
+    def get_instance():
+        """Static access method"""
+        if not UserService.__instance:
+            UserService.__instance = UserService()
+        return UserService.__instance
     
     def __init__(self):
+        """Virtually private constructor"""
+        if UserService.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            UserService.__instance = self
+            
         self.user_db_service = UserDatabaseService.get_instance()
-        self.forum_db_service = ForumDatabaseService()
-        self.comment_db_service = CommentDatabaseService()
+        self.forum_db_service = ForumDatabaseService.get_instance()
+        self.comment_db_service = CommentDatabaseService.get_instance()
         self.poll_db_service = PollDatabaseService()
         self.group_db_service = GroupDatabaseService()
     

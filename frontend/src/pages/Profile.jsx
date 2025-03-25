@@ -531,7 +531,7 @@ const Profile = () => {
                               <p className="text-gray-700">{comment.icerik}</p>
                               <div className="mt-2">
                                 <Link 
-                                  to={`/forums/${comment.forum_id}`}
+                                  to={`/forums/${comment.commented_on_id}`}
                                   className="text-sm text-blue-600 hover:underline"
                                 >
                                   Foruma git

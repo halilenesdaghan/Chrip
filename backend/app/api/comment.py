@@ -22,6 +22,7 @@ API endpoints for comment operations.
 
 Endpoints:
 - /comments/ [POST]: Create a new comment
+- /comments/commented_on_id=<commented_on_id> [GET]: Retrieve comments for a specific post
 - /comments/<comment_id> [GET]: Get a specific comment
 - /comments/<comment_id> [PUT]: Update an existing comment
 - /comments/<comment_id> [DELETE]: Delete a comment
@@ -51,6 +52,10 @@ class CommentReactionSchema(Schema):
         validate=validate.OneOf(['like', 'dislike']), 
         error_messages={'required': 'Reaksiyon türü gereklidir'}
     )
+
+class CommentedOnIdSchema(Schema):
+    """Commented on ID schema"""
+    commented_on_id = fields.Str(required=True, error_messages={'required': 'Commented On ID zorunludur'})
 
 # Routes
 @comment_bp.route('/', methods=['POST'])
@@ -83,6 +88,24 @@ def create_comment():
     except Exception as e:
         return error_response("Yorum oluşturulamadı", 500)
 
+@comment_bp.route('/commented_on_id=<commented_on_id>', methods=['GET'])
+@authenticate
+def get_comments(commented_on_id):
+    """
+    Retrieve comments for a specific post
+    """
+    try:
+        # Get comments
+        comments = CommentService.get_comments_by_commented_on_id(commented_on_id)
+        
+        return success_response(data=[comment.to_dict() for comment in comments], 
+            message="Yorumlar başarıyla getirildi"
+        )
+    
+    except Exception as e:
+        print (traceback.format_exc(), flush=True)
+        return error_response(str(e), 500)
+    
 @comment_bp.route('/<comment_id>', methods=['GET'])
 @authenticate
 def get_comment(comment_id):

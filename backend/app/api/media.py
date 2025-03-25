@@ -6,16 +6,17 @@ Medya yükleme, listeleme ve yönetimi için API endpoints.
 
 from flask import Blueprint, request, jsonify, g, current_app, send_from_directory
 from marshmallow import Schema, fields, validate
-from app.services.media_service import media_service
+from app.services.media_service import MediaService
 from app.utils.responses import success_response, error_response, list_response, created_response, deleted_response
 from app.middleware.validation import validate_schema, validate_path_param, validate_query_params, is_uuid, is_positive_integer
 from app.middleware.auth import authenticate
 from app.utils.exceptions import NotFoundError, ValidationError, ForbiddenError
-import os
+import traceback
 
 # Blueprint tanımla
 media_bp = Blueprint('media', __name__)
 
+media_service = MediaService.get_instance()
 # Şemalar
 class MediaUploadMetadataSchema(Schema):
     """Medya yükleme metadata şeması"""
@@ -51,6 +52,9 @@ def upload_file():
             return error_response("Dosya bulunamadı", 400)
         
         file = request.files['file']
+        # prints file in green using ansi escape codes
+        print ("\033[92m", file, "\033[0m", flush=True)
+        print ("\033[92m", file.filename, "\033[0m", flush=True)
         if file.filename == '':
             return error_response("Dosya seçilmedi", 400)
         
@@ -68,11 +72,14 @@ def upload_file():
         return created_response(result, "Dosya başarıyla yüklendi")
     
     except ValidationError as e:
+        print ("\033[91m", traceback.format_exc(), "\033[0m", flush=True)
         return error_response(e.message, 400, e.errors if hasattr(e, 'errors') else None)
     
     except Exception as e:
+        print ("\033[91m", traceback.format_exc(), "\033[0m", flush=True)
         return error_response(str(e), 500)
 
+'''
 @media_bp.route('/upload-multiple', methods=['POST'])
 @authenticate
 def upload_multiple_files():
@@ -206,7 +213,7 @@ def get_media_by_model(model_type, model_id):
     """
     try:
         # Model türü kontrolü
-        valid_model_types = ['genel', 'forum', 'comment', 'user', 'group', 'poll']
+        valid_model_types = ['general', 'forum', 'comment', 'user', 'group', 'poll']
         if model_type not in valid_model_types:
             return error_response(f"Geçersiz model türü. Geçerli türler: {', '.join(valid_model_types)}", 400)
         
@@ -269,3 +276,4 @@ def get_user_media(user_id):
     
     except Exception as e:
         return error_response(str(e), 500)
+'''

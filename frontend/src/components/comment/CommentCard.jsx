@@ -21,7 +21,7 @@ import api from '../../api';
 import { toast } from 'react-toastify';
 
 const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isReply = false }) => {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, token } = useSelector((state) => state.auth);
   const [showReply, setShowReply] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -29,7 +29,12 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
   const [reactionLoading, setReactionLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
   // Tarih formatla
   const formatDate = (dateString) => {
     try {
@@ -46,12 +51,12 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
       toast.warning('Lütfen önce giriş yapın.');
       return;
     }
-    
+
     try {
       setReactionLoading(true);
       const response = await api.post(`/comments/${comment.comment_id}/react`, {
         reaction_type: type
-      });
+      }, config);
       
       if (response.data.status === 'success') {
         // Başarılı reaksiyon
@@ -61,8 +66,8 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
         if (onUpdate) {
           onUpdate({
             ...comment,
-            begeni_sayisi: response.data.data.begeni_sayisi,
-            begenmeme_sayisi: response.data.data.begenmeme_sayisi
+            like_count: response.data.data.like_count,
+            dislike_count: response.data.data.dislike_count
           });
         }
         
@@ -107,7 +112,7 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
   };
   
   // Kullanıcının bu yorumu düzenleme yetkisi var mı?
-  const canEdit = isAuthenticated && user && comment.acan_kisi_id === user.user_id;
+  const canEdit = isAuthenticated && user && comment.creator_id === user.user_id;
 
   return (
     <div className={`bg-white rounded-lg ${isReply ? 'pl-4 border-l-2 border-gray-200' : 'border border-gray-200'} p-4 mb-4`}>
@@ -115,8 +120,8 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
       <div className="flex">
         {/* Kullanıcı avatarı */}
         <Avatar
-          src={comment.acan_kisi?.profil_resmi_url}
-          alt={comment.acan_kisi?.username || 'Kullanıcı'}
+          src={comment.creator_id?.profile_image_url}
+          alt={comment.creator_id?.username || 'Kullanıcı'}
           size="md"
           className="mr-3 flex-shrink-0"
         />
@@ -126,10 +131,10 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
           <div className="flex justify-between items-start">
             <div>
               <div className="font-medium text-gray-900">
-                {comment.acan_kisi?.username || 'Anonim'}
+                {comment.creator_id?.username || 'Anonim'}
               </div>
               <div className="text-xs text-gray-500">
-                {formatDate(comment.acilis_tarihi)}
+                {formatDate(comment.created_at)}
               </div>
             </div>
             
@@ -173,14 +178,14 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
           
           {/* Yorum içeriği */}
           <div className="mt-2">
-            <p className="text-gray-700 whitespace-pre-line">{comment.icerik}</p>
+            <p className="text-gray-700 whitespace-pre-line">{comment.content}</p>
           </div>
           
           {/* Yorum fotoğrafları */}
-          {comment.foto_urls && comment.foto_urls.length > 0 && (
+          {comment.photo_urls && comment.photo_urls.length > 0 && (
             <div className="mt-3">
               <div className="flex flex-wrap gap-2">
-                {comment.foto_urls.map((url, index) => (
+                {comment.photo_urls.map((url, index) => (
                   <img
                     key={index}
                     src={url}
@@ -196,10 +201,10 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
           <div className="mt-3 flex space-x-4">
             {/* Beğeni */}
             <button
-              onClick={() => handleReaction('begeni')}
+              onClick={() => handleReaction('like')}
               disabled={reactionLoading}
               className={`flex items-center text-sm ${
-                userReaction === 'begeni' 
+                userReaction === 'like' 
                   ? 'text-blue-600' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
@@ -209,12 +214,12 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
               ) : (
                 <FaRegThumbsUp className="mr-1" />
               )}
-              <span>{comment.begeni_sayisi || 0}</span>
+              <span>{comment.like_count || 0}</span>
             </button>
             
             {/* Beğenmeme */}
             <button
-              onClick={() => handleReaction('begenmeme')}
+              onClick={() => handleReaction('dislike')}
               disabled={reactionLoading}
               className={`flex items-center text-sm ${
                 userReaction === 'begenmeme' 
@@ -222,12 +227,12 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              {userReaction === 'begenmeme' ? (
+              {userReaction === 'dislike' ? (
                 <FaThumbsDown className="mr-1" />
               ) : (
                 <FaRegThumbsDown className="mr-1" />
               )}
-              <span>{comment.begenmeme_sayisi || 0}</span>
+              <span>{comment.dislike_count || 0}</span>
             </button>
             
             {/* Yanıt butonu */}
@@ -248,7 +253,7 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
       {showReply && (
         <div className="mt-4 ml-12">
           <CommentForm
-            forumId={comment.forum_id}
+            forumId={comment.commented_on_id}
             parentCommentId={comment.comment_id}
             onCommentAdded={handleReplyAdded}
             onCancel={() => setShowReply(false)}
@@ -297,18 +302,14 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
 CommentCard.propTypes = {
   comment: PropTypes.shape({
     comment_id: PropTypes.string.isRequired,
-    forum_id: PropTypes.string.isRequired,
-    acan_kisi_id: PropTypes.string,
-    acan_kisi: PropTypes.shape({
-      username: PropTypes.string,
-      profil_resmi_url: PropTypes.string
-    }),
-    icerik: PropTypes.string.isRequired,
-    acilis_tarihi: PropTypes.string,
-    foto_urls: PropTypes.arrayOf(PropTypes.string),
-    begeni_sayisi: PropTypes.number,
-    begenmeme_sayisi: PropTypes.number,
-    ust_yorum_id: PropTypes.string
+    commented_on_id: PropTypes.string.isRequired,
+    creator_id: PropTypes.string,
+    content: PropTypes.string.isRequired,
+    created_at: PropTypes.string,
+    photo_urls: PropTypes.arrayOf(PropTypes.string),
+    like_count: PropTypes.string,
+    dislike_count: PropTypes.string,
+    latest_sub_comment: PropTypes.string
   }).isRequired,
   onUpdate: PropTypes.func,
   onDelete: PropTypes.func,

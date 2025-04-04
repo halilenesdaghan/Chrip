@@ -33,6 +33,10 @@ class AuthService:
         print (traceback.format_exc())
         raise ValidationError("An error occurred")
     
+    def email_exists(self, email):
+        """Check if email exists in the database"""
+        return self.user_db_service._get_user_by_email(email) is not None
+    
     def register(self, user_data):
         """Register a new user"""
         # Validate required fields

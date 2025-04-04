@@ -9,6 +9,35 @@ import jwt
 import uuid
 from datetime import datetime, timedelta
 from flask import current_app
+from app.paths import *
+import json
+
+def check_university_email(email):
+    """
+    Verilen e-posta adresinin kayıtlı üniversitelere ait olup olmadığını kontrol eder ve ait olduğu üniversiteyi döndürür.
+    
+    Args:
+        email (str): Kontrol edilecek e-posta adresi
+
+    Returns:
+        str: E-posta adresinin ait olduğu üniversite adı veya None
+    """
+    # E-posta adresini kontrol et
+    if '@' not in email:
+        return None
+    
+    # E-posta adresinin üniversiteye ait olup olmadığını kontrol et
+    university_email = email.split('@')[1]
+    
+    # Üniversiteleri yükle
+    with open(UNIVERSITY_EMAIL_DATA_FILE, 'r', encoding='utf-8') as f:
+        university_emails = json.load(f)
+    
+    # Eğer üniversite kayıtlıysa, üniversite adını döndür
+    if university_email in university_emails:
+        return university_emails[university_email]
+    
+    return None
 
 
 def hash_password(password):

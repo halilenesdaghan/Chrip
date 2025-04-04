@@ -5,6 +5,8 @@ from app.utils.responses import success_response, error_response, created_respon
 from app.middleware.validation import validate_schema
 from app.middleware.auth import authenticate
 from app.utils.exceptions import AuthError, ValidationError
+from app.utils.auth import check_university_email
+from app.utils.username import get_new_username_for_university
 
 """
 API endpoints for user authentication.
@@ -28,10 +30,8 @@ auth_service = AuthService()
 class RegisterSchema(Schema):
     """Registration schema"""
     email = fields.Email(required=True, error_messages={'required': 'E-posta gereklidir'})
-    username = fields.Str(required=True, validate=validate.Length(min=3, max=30), error_messages={'required': 'Kullanıcı adı gereklidir'})
     password = fields.Str(required=True, validate=validate.Length(min=6), error_messages={'required': 'Şifre gereklidir'})
     gender = fields.Str(validate=validate.OneOf(['Erkek', 'Kadın', 'Diğer']))
-    university = fields.Str()
 
 class LoginSchema(Schema):
     """Login schema"""
@@ -60,7 +60,20 @@ def register():
     try:
         # Get validated data
         data = request.validated_data
+
+        email = data['email']
+
+        email_exists = auth_service.email_exists(email)
+        if email_exists:
+            return error_response("E-posta adresi zaten kayıtlı", 400)
         
+        university = check_university_email(email)
+        if not university:
+            return error_response("Geçersiz üniversite e-posta adresi", 400)
+        
+        data['university'] = university
+
+        data['username'] = get_new_username_for_university(university)
         # Register user
         result = auth_service.register(data)
         

@@ -245,12 +245,30 @@ class CommentDatabaseService:
             print(f"\033[91m{str(e)}\033[00m", flush=True)
             return []
         
+    def add_sub_comment(self,
+                        comment_id,
+                        sub_comment_id):
+        """
+        Add a sub-comment to a comment
+        """
+        try:
+            #latest_sub_comment_model = self.get_comment_by_id(sub_comment_id)
+            return self.update_comment(
+                comment_id=comment_id,
+                user_id=None,
+                update_data={"latest_sub_comment": sub_comment_id},
+                authorized=True
+            )
+        except Exception as e:
+            print(f"\033[91m{traceback.format_exc()}\033[00m", flush=True)
+            raise e
 
     def update_comment(
         self, 
         comment_id: str, 
         user_id: str, 
-        update_data: Dict[str, any]
+        update_data: Dict[str, any],
+        authorized: bool = False
     ) -> Optional[CommentModel]:
         """
         Update an existing comment
@@ -274,15 +292,16 @@ class CommentDatabaseService:
                 raise ValueError("Comment not found")
             
             # Check authorization
-            if comment.creator_id != user_id:
-                raise ValueError("Not authorized to update this comment")
+            if not authorized:
+                if comment.creator_id != user_id:
+                    raise ValueError("Not authorized to update this comment")
             
             # Prepare update expression and values
             update_expr = []
             expr_attr_values = {}
             
             # Updatable fields
-            updatable_fields = ['content', 'photo_urls']
+            updatable_fields = ['content', 'photo_urls', 'is_active', 'latest_sub_comment', 'sub_comment_list']
             
             for field in updatable_fields:
                 if field in update_data and update_data[field] is not None:
@@ -308,6 +327,9 @@ class CommentDatabaseService:
         
         except ClientError as e:
             raise ValueError(f"Error updating comment: {e}")
+        except Exception as e:
+            print (traceback.format_exc(), flush=True)
+            raise e
 
     def delete_comment(
         self, 

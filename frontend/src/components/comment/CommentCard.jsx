@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { formatDistanceToNow } from 'date-fns';
@@ -29,12 +29,28 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
   const [reactionLoading, setReactionLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [ comment_creator_info, setCommentCreatorInfo ] = useState(null);
 
   const config = {
     headers: {
       Authorization: `Bearer ${token}`
     }
   };
+
+  // When The Card is Mounted asks for the created info of the comment using /comments/:comment_id/creator_info
+  useEffect(() => {
+    const getCommentCreatorInfo = async () => {
+      try {
+        const response = await api.get(`/comments/${comment.comment_id}/creator_info`, config);
+        if (response.data.status === 'success') {
+          setCommentCreatorInfo(response.data.data);
+        }
+      } catch (err) {
+        console.error('Error getting comment creator info:', err);
+      }
+    }
+    getCommentCreatorInfo();
+  }, []);
   // Tarih formatla
   const formatDate = (dateString) => {
     try {
@@ -53,7 +69,7 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
     }
 
     try {
-      setReactionLoading(true);
+      setReactionLoading(true); 
       const response = await api.post(`/comments/${comment.comment_id}/react`, {
         reaction_type: type
       }, config);
@@ -120,8 +136,8 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
       <div className="flex">
         {/* Kullanıcı avatarı */}
         <Avatar
-          src={comment.creator_id?.profile_image_url}
-          alt={comment.creator_id?.username || 'Kullanıcı'}
+          src={comment_creator_info?.profile_image_url}
+          alt={comment_creator_info?.username || 'Kullanıcı'}
           size="md"
           className="mr-3 flex-shrink-0"
         />
@@ -131,7 +147,7 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
           <div className="flex justify-between items-start">
             <div>
               <div className="font-medium text-gray-900">
-                {comment.creator_id?.username || 'Anonim'}
+                {comment_creator_info?.username || 'Anonim'}
               </div>
               <div className="text-xs text-gray-500">
                 {formatDate(comment.created_at)}
@@ -253,10 +269,10 @@ const CommentCard = ({ comment, onUpdate, onDelete, showReplyForm = true, isRepl
       {showReply && (
         <div className="mt-4 ml-12">
           <CommentForm
-            forumId={comment.commented_on_id}
-            parentCommentId={comment.comment_id}
+            commented_on_id={comment.comment_id}
             onCommentAdded={handleReplyAdded}
             onCancel={() => setShowReply(false)}
+            isReply={true}
             placeholder="Yanıtınızı yazın..."
           />
         </div>
@@ -307,9 +323,33 @@ CommentCard.propTypes = {
     content: PropTypes.string.isRequired,
     created_at: PropTypes.string,
     photo_urls: PropTypes.arrayOf(PropTypes.string),
-    like_count: PropTypes.string,
-    dislike_count: PropTypes.string,
-    latest_sub_comment: PropTypes.string
+    like_count: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
+    dislike_count: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
+    latest_sub_comment: PropTypes.oneOfType([
+      PropTypes.shape({
+        comment_id: PropTypes.string,
+        commented_on_id: PropTypes.string,
+        creator_id: PropTypes.string,
+        content: PropTypes.string,
+        created_at: PropTypes.string,
+        photo_urls: PropTypes.arrayOf(PropTypes.string),
+        like_count: PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.number
+        ]),
+        dislike_count: PropTypes.oneOfType([
+          PropTypes.string,
+          PropTypes.number
+        ]),
+      }),
+      PropTypes.oneOf([null])
+    ])
   }).isRequired,
   onUpdate: PropTypes.func,
   onDelete: PropTypes.func,

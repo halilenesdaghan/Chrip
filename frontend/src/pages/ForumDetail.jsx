@@ -104,7 +104,14 @@ const ForumDetail = () => {
         };
 
         const response = await api.get(`/comments/commented_on_id=${id}`, config);
-        setComments(response.data.data || []);
+
+        const normalizedComments = (response.data.data || []).map(comment => ({
+          ...comment,
+          like_count: Number(comment.like_count),
+          dislike_count: Number(comment.dislike_count),
+        }));
+
+        setComments(normalizedComments);
       } catch (err) {
         console.error('Error fetching comments:', err);
         // Yorumlar yüklenmediğinde varsayılan boş dizi kullanılır
@@ -346,11 +353,11 @@ const ForumDetail = () => {
         </div>
       </div>
       
-      {/* Yorum formu */}
+      {/* Yorum Ekleme formu */}
       {isAuthenticated ? (
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Yorum Ekle</h3>
-          <CommentForm forumId={id} onCommentAdded={handleAddComment} />
+          <CommentForm commented_on_id={id} onCommentAdded={handleAddComment} />
         </div>
       ) : (
         <div className="mt-8 p-4 bg-blue-50 text-blue-700 rounded-md">
@@ -363,7 +370,7 @@ const ForumDetail = () => {
         </div>
       )}
       
-      {/* Yorumlar */}
+      {/* Forumlara Yapılan Yorumların Listesi */}
       <div className="mt-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Yorumlar</h3>
         

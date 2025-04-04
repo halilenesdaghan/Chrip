@@ -28,6 +28,8 @@ Endpoints:
 - /comments/<comment_id> [DELETE]: Delete a comment
 - /comments/<comment_id>/replies [GET]: Get replies for a specific comment
 - /comments/<comment_id>/react [POST]: Add a reaction to a comment
+- /comments/<comment_id>/creator_info [GET]: Retrieve creator information for a specific comment
+- /comments/<comment_id>/reply [POST]: Add a reply to a comment
 """
 
 # Blueprint and Database Service
@@ -71,6 +73,8 @@ def create_comment():
         
         # Get validated data from request
         data = request.validated_data
+
+        print (data)
         
         # Create comment
         comment = CommentService.create_comment(
@@ -230,3 +234,51 @@ def react_to_comment(comment_id):
     except Exception as e:
         print (traceback.format_exc(), flush=True)
         return error_response("Reaksiyon eklenemedi", 500)
+    
+@comment_bp.route('/<comment_id>/creator_info', methods=['GET'])
+@authenticate
+def get_comment_creator_info(comment_id):
+    """
+    Retrieve creator information for a specific comment
+    """
+    try:
+        # Get creator information
+        creator_info = CommentService.get_creator_info(comment_id)
+
+        if not creator_info:
+            return error_response("Kullanıcı bilgileri bulunamadı", 404)
+        
+        return success_response(creator_info, "Kullanıcı bilgileri başarıyla getirildi")
+    
+    except Exception as e:
+        print (traceback.format_exc(), flush=True)
+        return error_response(str(e), 500)
+    
+@comment_bp.route('/<comment_id>/reply', methods=['POST'])
+@authenticate
+def reply_comment(comment_id):
+    """
+    Add a reply to a comment
+    """
+    try:
+        # Get current user ID from authentication middleware
+        user_id = g.user.user_id
+        
+        # Get reply data
+        data = request.get_json()
+        
+        # Add reply
+        result = CommentService.add_reply(
+            comment_id=comment_id,
+            creator_id=user_id,
+            content=data.get('content'),
+            photo_urls=data.get('photo_urls', [])
+        )
+        
+        return created_response(result.to_dict(), "Yanıt başarıyla eklendi")
+    
+    except ValueError as e:
+        return error_response(str(e), 400)
+    except Exception as e:
+        print (traceback.format_exc(), flush=True)
+        return error_response("Yanıt eklenemedi", 500)

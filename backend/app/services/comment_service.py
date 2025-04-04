@@ -178,3 +178,67 @@ class CommentService:
             print (traceback.format_exc(), flush=True)
             logging.error(f"Comment reaction failed: {e}")
             raise e
+
+    @staticmethod
+    def get_creator_info(comment_id: str) -> dict:
+        """
+        Retrieve creator information for a specific comment
+
+        Args:
+            comment_id (str): ID of the comment
+
+        Returns:
+            dict: Creator information
+        """
+        try:
+            comment_db_service = CommentDatabaseService.get_instance()
+            user_db_service = UserDatabaseService.get_instance()
+            comment = comment_db_service.get_comment_by_id(comment_id)
+            user = user_db_service._get_user_by_user_id(comment.creator_id)
+            if not user:
+                raise Exception("User not found")
+            return user.safe_dict()
+        except Exception as e:
+            print (traceback.format_exc(), flush=True)
+            logging.error(f"Creator information retrieval failed: {e}")
+            raise e
+
+    @staticmethod
+    def add_reply(comment_id: str,
+                    creator_id: str,
+                    content: str,
+                    photo_urls: list[str]):
+        """
+        Add a reply to a comment
+
+        Args:
+            comment_id (str): ID of the commented object
+            creator_id (str): ID of the creator
+            content (str): Reply content
+            photo_urls (list[str]): List of photo URLs
+
+        Returns:
+            CommentModel: Created reply
+        """
+        try:
+            comment_db_service = CommentDatabaseService.get_instance()
+            reply_comment = comment_db_service.create_comment(
+                user_id=creator_id,
+                commented_on_id=comment_id,
+                content=content,
+                photo_urls=photo_urls
+            )
+            original_comment = comment_db_service.get_comment_by_id(comment_id)
+            original_comment.add_reply(reply_comment)
+            updated_comment = comment_db_service.update_comment(
+                comment_id,
+                original_comment.creator_id,
+                update_data=original_comment.to_dict()
+            )
+            return reply_comment
+        
+        except Exception as e:
+            print (traceback.format_exc(), flush=True)
+            logging.error(f"Reply creation failed: {e}")
+            raise e
+        

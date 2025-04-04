@@ -30,7 +30,7 @@ class CommentModel:
         like_count: int = 0,
         dislike_count: int = 0,
         sub_comment_list: Optional[List['str']] = None,
-        latest_sub_comment: 'CommentModel' = None,
+        latest_sub_comment: Optional[dict] = None,
         is_active: bool = True
     ):
         # Generate unique comment ID if not provided
@@ -82,7 +82,7 @@ class CommentModel:
             'like_count': self.like_count,
             'dislike_count': self.dislike_count,
             'sub_comment_list': [sub_comment for sub_comment in self.sub_comment_list],
-            'latest_sub_comment': self.latest_sub_comment.to_dict() if self.latest_sub_comment else None,
+            'latest_sub_comment': self.latest_sub_comment if self.latest_sub_comment else None,
             'is_active': self.is_active
         }
     
@@ -91,7 +91,7 @@ class CommentModel:
         Add a sub-comment to the comment
         """
         self.sub_comment_list.append(sub_comment.comment_id)
-        self.latest_sub_comment = sub_comment
+        self.latest_sub_comment = sub_comment.to_dict()
         return
 
 

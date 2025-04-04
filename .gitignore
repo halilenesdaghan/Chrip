@@ -1,3 +1,7 @@
 backend/venv
 backend/.env
+backend/app.log
+backend/chrip.zip
 frontend/node_modules
+videos
+EC2

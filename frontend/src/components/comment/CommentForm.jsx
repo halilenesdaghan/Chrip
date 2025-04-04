@@ -9,18 +9,24 @@ import MediaUploader from '../media/MediaUploader';
 import { toast } from 'react-toastify';
 
 const CommentForm = ({ 
-  forumId, 
-  parentCommentId = null, 
+  commented_on_id,
   onCommentAdded,
   onCancel = null,
+  isReply = false,
   placeholder = 'Yorumunuzu yazın...'
 }) => {
   const [content, setContent] = useState('');
   const [photoUrls, setPhotoUrls] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
 
+  const auth_config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -33,17 +39,20 @@ const CommentForm = ({
       setIsSubmitting(true);
       
       const commentData = {
-        forum_id: forumId,
-        icerik: content,
-        foto_urls: photoUrls,
+        content: content,
+        photo_urls: photoUrls,
       };
       
-      // Eğer yanıt ise, üst yorum ID'sini ekle
-      if (parentCommentId) {
-        commentData.ust_yorum_id = parentCommentId;
-      }
+      let response;
       
-      const response = await api.post('/comments', commentData);
+      if (isReply) {
+        // For replies, use the comment_id/reply endpoint
+        response = await api.post(`/comments/${commented_on_id}/reply`, commentData, auth_config);
+      } else {
+        // For new comments, add the commented_on_id to the payload
+        commentData.commented_on_id = commented_on_id;
+        response = await api.post('/comments/', commentData, auth_config);
+      }
       
       // Başarılı yanıt
       if (response.data.status === 'success') {
@@ -57,7 +66,7 @@ const CommentForm = ({
           onCommentAdded(response.data.data);
         }
         
-        toast.success(parentCommentId ? 'Yanıt başarıyla eklendi' : 'Yorum başarıyla eklendi');
+        toast.success(isReply ? 'Yanıt başarıyla eklendi' : 'Yorum başarıyla eklendi');
       } else {
         throw new Error(response.data.message || 'Yorum eklenirken bir hata oluştu');
       }
@@ -200,10 +209,10 @@ const CommentForm = ({
 };
 
 CommentForm.propTypes = {
-  forumId: PropTypes.string.isRequired,
-  parentCommentId: PropTypes.string,
+  commented_on_id: PropTypes.string.isRequired,
   onCommentAdded: PropTypes.func,
   onCancel: PropTypes.func,
+  isReply: PropTypes.bool,
   placeholder: PropTypes.string,
 };
 
